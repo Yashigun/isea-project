@@ -20,11 +20,11 @@ class Customer(Base, UUIDMixin, TimestampMixin):
         "schema":"store"
     }
     
-    firstNmae: Mapped[str] = mapped_column(
+    first_name: Mapped[str] = mapped_column(
         String(100),
         nullable = False
     )
-    lasttNmae: Mapped[str] = mapped_column(
+    last_name: Mapped[str] = mapped_column(
         String(100),
         nullable = False
     )
