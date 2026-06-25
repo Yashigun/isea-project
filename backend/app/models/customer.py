@@ -1,11 +1,12 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import String, Integer, DateTime, Enum as SQLEnum
+from sqlalchemy import DateTime, Enum as SQLEnum, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.database import Base
-from app.models.base import UUIDMixin, TimestampMixin
+from app.models.base import TimestampMixin, UUIDMixin
+
 
 class AccountStatus(str, Enum):
     ACTIVE = "active"
@@ -13,35 +14,45 @@ class AccountStatus(str, Enum):
     SUSPENDED = "suspended"
     DELETED = "deleted"
 
+
+account_status_enum = SQLEnum(
+    AccountStatus,
+    name="account_status",
+    values_callable=lambda enum: [member.value for member in enum],
+)
+
+
 class Customer(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "customers"
-    
+
     __table_args__ = {
-        "schema":"store"
+        "schema": "store"
     }
-    
+
     first_name: Mapped[str] = mapped_column(
         String(100),
-        nullable = False
+        nullable=False
     )
+
     last_name: Mapped[str] = mapped_column(
         String(100),
-        nullable = False
+        nullable=False
     )
-    
+
     email: Mapped[str] = mapped_column(
         String(255),
-        unique = True,
-        nullable = False,
-        index = True
+        unique=True,
+        index=True,
+        nullable=False
     )
-    
-    password_hash: Mapped[str]=  mapped_column(
+
+    password_hash: Mapped[str | None] = mapped_column(
         String(255),
-        nullable = True
+        nullable=True
     )
+
     account_status: Mapped[AccountStatus] = mapped_column(
-        SQLEnum(AccountStatus),
+        account_status_enum,
         default=AccountStatus.INACTIVE,
         nullable=False
     )

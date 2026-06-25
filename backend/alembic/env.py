@@ -7,6 +7,8 @@ from alembic import context
 
 from app.db.database import Base
 from app.models.customer import Customer
+from app.models.category import Category
+from app.models.product import Product
 
 from dotenv import load_dotenv
 import os
@@ -56,6 +58,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_schemas=True,
+        compare_type=True,
     )
 
     with context.begin_transaction():
@@ -77,8 +81,11 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        connection=connection,
+        target_metadata=target_metadata,
+        include_schemas=True,
+        compare_type=True,
+)
 
         with context.begin_transaction():
             context.run_migrations()
