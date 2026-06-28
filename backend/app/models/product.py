@@ -64,3 +64,9 @@ class Product(Base, UUIDMixin, TimestampMixin):
     category: Mapped["Category"] = relationship(
         back_populates="products",
     )
+    
+    images: Mapped[list["ProductImage"]] = relationship(
+        back_populates="product",
+        cascade="all, delete-orphan",
+        order_by="ProductImage.display_order",
+    )

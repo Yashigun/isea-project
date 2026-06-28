@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
+import secrets
 
-from sqlalchemy import DateTime, func
+from sqlalchemy import DateTime, func, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -26,4 +27,15 @@ class TimestampMixin:
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+    
+    
+
+class PublicIdMixin:
+    public_id: Mapped[str] = mapped_column(
+        String(16),
+        unique=True,
+        index=True,
+        nullable=False,
+        default=lambda: secrets.token_urlsafe(12)[:16],
     )
