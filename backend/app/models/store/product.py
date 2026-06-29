@@ -3,7 +3,14 @@ from __future__ import annotations
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import Boolean, ForeignKey, Numeric, String, Text
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    ForeignKey,
+    Numeric,
+    String,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
@@ -13,12 +20,22 @@ from app.models.base import TimestampMixin, UUIDMixin
 class Product(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "products"
 
-    __table_args__ = {
-        "schema": "store"
-    }
+    __table_args__ = (
+        CheckConstraint(
+            "price > 0",
+            name="ck_product_price_positive",
+        ),
+        CheckConstraint(
+            "discount_price IS NULL OR discount_price <= price",
+            name="ck_product_discount_price",
+        ),
+        {
+            "schema": "store",
+        },
+    )
 
     category_id: Mapped[UUID] = mapped_column(
-        ForeignKey("store.categories.id"),
+        ForeignKey("store.categories.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
@@ -26,6 +43,7 @@ class Product(Base, UUIDMixin, TimestampMixin):
     name: Mapped[str] = mapped_column(
         String(200),
         nullable=False,
+        index=True
     )
 
     slug: Mapped[str] = mapped_column(
@@ -69,4 +87,16 @@ class Product(Base, UUIDMixin, TimestampMixin):
         back_populates="product",
         cascade="all, delete-orphan",
         order_by="ProductImage.display_order",
+    )
+    wishlist_items: Mapped[list["WishlistItem"]] = relationship(
+        back_populates="product",
+    )
+    cart_items: Mapped[list["CartItem"]] = relationship(
+        back_populates="product",
+    )
+    order_items: Mapped[list["OrderItem"]] = relationship(
+        back_populates="product",
+    )
+    reviews: Mapped[list["ProductReview"]] = relationship(
+        back_populates="product",
     )

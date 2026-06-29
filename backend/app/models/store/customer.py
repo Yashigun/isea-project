@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import DateTime, Enum as SQLEnum, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
 from app.models.base import TimestampMixin, UUIDMixin
@@ -71,4 +71,29 @@ class Customer(Base, UUIDMixin, TimestampMixin):
     last_login_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
+    )
+    addresses: Mapped[list["Address"]] = relationship(
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    phone_numbers: Mapped[list["PhoneNumber"]] = relationship(
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    wishlist_items: Mapped[list["WishlistItem"]] = relationship(
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    cart: Mapped["Cart"] = relationship(
+        back_populates="customer",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    orders: Mapped[list["Order"]] = relationship(
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    reviews: Mapped[list["ProductReview"]] = relationship(
+        back_populates="customer",
+        cascade="all, delete-orphan",
     )

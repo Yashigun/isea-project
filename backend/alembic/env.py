@@ -6,10 +6,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.db.database import Base
-from app.models.customer import Customer
-from app.models.category import Category
-from app.models.product import Product
-from app.models.productImage import ProductImage
+
+import app.models.store
 
 from dotenv import load_dotenv
 import os

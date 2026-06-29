@@ -31,7 +31,8 @@ class Category(Base, UUIDMixin, TimestampMixin):
     ) 
     is_active: Mapped[bool] = mapped_column(
         Boolean,
-        default=True
+        default=True,
+        nullable=False,
     )
     products: Mapped[list["Product"]] = relationship(
         back_populates="category"

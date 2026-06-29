@@ -17,12 +17,12 @@ from app.db.database import Base
 from app.models.base import UUIDMixin, TimestampMixin
 
 
-class CustomerAddress(
+class PhoneNumber(
     Base,
     UUIDMixin,
     TimestampMixin,
 ):
-    __tablename__ = "customer_addresses"
+    __tablename__ = "phone_numbers"
 
     __table_args__ = {
         "schema": "store"
@@ -37,32 +37,7 @@ class CustomerAddress(
         index=True,
     )
 
-    address_line_1: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-    )
-
-    address_line_2: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-    )
-
-    city: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-    )
-
-    state: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-    )
-
-    country: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-    )
-
-    postal_code: Mapped[str] = mapped_column(
+    phone_number: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
     )
@@ -74,5 +49,5 @@ class CustomerAddress(
     )
 
     customer: Mapped["Customer"] = relationship(
-        back_populates="addresses",
+        back_populates="phone_numbers",
     )

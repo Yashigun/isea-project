@@ -6,7 +6,7 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     Integer,
-    LargeBinary,
+    CheckConstraint,
     String,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -19,9 +19,19 @@ class ProductImage( Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     
     __tablename__ = "product_images"
 
-    __table_args__ = {
-        "schema": "store"
-    }
+    __table_args__ = (
+        CheckConstraint(
+            "file_size > 0",
+            name="ck_product_image_file_size_positive",
+        ),
+        CheckConstraint(
+            "display_order > 0",
+            name="ck_product_image_display_order_positive",
+        ),
+        {
+            "schema": "store",
+        },
+    )
 
     product_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(
