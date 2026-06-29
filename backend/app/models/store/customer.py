@@ -97,3 +97,19 @@ class Customer(Base, UUIDMixin, TimestampMixin):
         back_populates="customer",
         cascade="all, delete-orphan",
     )
+    sessions: Mapped[list["CustomerSession"]] = relationship(
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )
+    login_attempts: Mapped[list["LoginAttempt"]] = relationship(
+        back_populates="customer",
+    )
+    request_logs: Mapped[list["RequestLog"]] = relationship(
+        back_populates="customer",
+    )
+    audit_logs: Mapped[list["AuditLog"]] = relationship(
+        back_populates="customer",
+    )
+    security_events: Mapped[list["SecurityEvent"]] = relationship(
+        back_populates="customer",
+    )
