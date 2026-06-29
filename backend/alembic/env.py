@@ -8,6 +8,7 @@ from alembic import context
 from app.db.database import Base
 
 import app.models.store
+import app.models.security
 
 from dotenv import load_dotenv
 import os
