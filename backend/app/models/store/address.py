@@ -17,11 +17,7 @@ from app.db.database import Base
 from app.models.base import UUIDMixin, TimestampMixin
 
 
-class Address(
-    Base,
-    UUIDMixin,
-    TimestampMixin,
-):
+class Address( Base, UUIDMixin, TimestampMixin):
     __tablename__ = "customer_addresses"
 
     __table_args__ = {
