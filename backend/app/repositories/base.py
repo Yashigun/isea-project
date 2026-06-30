@@ -77,3 +77,30 @@ class BaseRepository(Generic[ModelType]):
         """
 
         self.db.delete(instance)
+        
+    def create(
+        self,
+        instance: ModelType,
+    ) -> ModelType:
+
+        self.db.add(instance)
+
+        return instance
+
+    def save(
+        self,
+        instance: ModelType,
+    ) -> ModelType:
+
+        self.flush()
+
+        self.refresh(instance)
+
+        return instance
+
+    def remove(
+        self,
+        instance: ModelType,
+    ) -> None:
+
+        self.db.delete(instance)
