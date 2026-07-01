@@ -9,14 +9,14 @@ from app.db.database import SessionLocal
 
 def get_db() -> Generator[Session, None, None]:
     """
-    Create a new SQLAlchemy database session.
+    FastAPI dependency that provides a SQLAlchemy session.
 
-    A fresh session is provided for every request and is
-    automatically closed when the request finishes,
-    regardless of whether it succeeds or raises an exception.
+    A new database session is created for each request and is
+    always closed after the request finishes, even if an
+    exception occurs.
     """
 
-    db = SessionLocal()
+    db: Session = SessionLocal()
 
     try:
         yield db

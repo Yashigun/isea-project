@@ -29,11 +29,7 @@ class BlockedIPRepository(
     database operations.
     """
 
-    def __init__(
-        self,
-        db: Session,
-    ) -> None:
-
+    def __init__( self, db: Session,) -> None:
         super().__init__(db)
 
     # ---------------------------------------------------------
@@ -41,9 +37,7 @@ class BlockedIPRepository(
     # ---------------------------------------------------------
 
     @staticmethod
-    def _active_block_condition(
-        current_time: datetime,
-    ):
+    def _active_block_condition( current_time: datetime ):
         """
         Active blocks include:
         - Permanent blocks (blocked_until IS NULL)
@@ -62,11 +56,7 @@ class BlockedIPRepository(
     # Read
     # ---------------------------------------------------------
 
-    def get_by_id(
-        self,
-        blocked_ip_id: UUID,
-    ) -> BlockedIP | None:
-
+    def get_by_id( self, blocked_ip_id: UUID ) -> BlockedIP | None:
         statement = (
             select(BlockedIP)
             .where(
@@ -76,10 +66,7 @@ class BlockedIPRepository(
 
         return self.db.scalar(statement)
 
-    def get_by_public_id(
-        self,
-        public_id: str,
-    ) -> BlockedIP | None:
+    def get_by_public_id( self, public_id: str ) -> BlockedIP | None:
 
         statement = (
             select(BlockedIP)
@@ -90,10 +77,7 @@ class BlockedIPRepository(
 
         return self.db.scalar(statement)
 
-    def get_by_ip_address(
-        self,
-        ip_address: str,
-    ) -> BlockedIP | None:
+    def get_by_ip_address( self, ip_address: str ) -> BlockedIP | None:
 
         statement = (
             select(BlockedIP)
@@ -104,11 +88,7 @@ class BlockedIPRepository(
 
         return self.db.scalar(statement)
 
-    def get_active_block(
-        self,
-        ip_address: str,
-        current_time: datetime,
-    ) -> BlockedIP | None:
+    def get_active_block( self, ip_address: str, current_time: datetime ) -> BlockedIP | None:
 
         statement = (
             select(BlockedIP)
@@ -124,10 +104,7 @@ class BlockedIPRepository(
 
         return self.db.scalar(statement)
 
-    def get_recent_blocks(
-        self,
-        limit: int = 100,
-    ) -> list[BlockedIP]:
+    def get_recent_blocks( self, limit: int = 100 ) -> list[BlockedIP]:
 
         statement = (
             select(BlockedIP)
@@ -141,10 +118,7 @@ class BlockedIPRepository(
             self.db.scalars(statement)
         )
 
-    def list_active_blocks(
-        self,
-        current_time: datetime,
-    ) -> list[BlockedIP]:
+    def list_active_blocks( self, current_time: datetime ) -> list[BlockedIP]:
 
         statement = (
             select(BlockedIP)
@@ -162,10 +136,7 @@ class BlockedIPRepository(
             self.db.scalars(statement)
         )
 
-    def list_expired_blocks(
-        self,
-        current_time: datetime,
-    ) -> list[BlockedIP]:
+    def list_expired_blocks( self, current_time: datetime ) -> list[BlockedIP]:
 
         statement = (
             select(BlockedIP)
@@ -184,10 +155,7 @@ class BlockedIPRepository(
             self.db.scalars(statement)
         )
 
-    def exists_by_ip(
-        self,
-        ip_address: str,
-    ) -> bool:
+    def exists_by_ip( self, ip_address: str ) -> bool:
 
         statement = (
             select(BlockedIP.id)
@@ -202,10 +170,7 @@ class BlockedIPRepository(
     # Statistics
     # ---------------------------------------------------------
 
-    def count_active_blocks(
-        self,
-        current_time: datetime,
-    ) -> int:
+    def count_active_blocks( self, current_time: datetime, ) -> int:
 
         statement = (
             select(
@@ -222,10 +187,7 @@ class BlockedIPRepository(
 
         return self.db.scalar(statement) or 0
 
-    def count_expired_blocks(
-        self,
-        current_time: datetime,
-    ) -> int:
+    def count_expired_blocks( self, current_time: datetime ) -> int:
 
         statement = (
             select(
@@ -246,9 +208,7 @@ class BlockedIPRepository(
 
         return self.db.scalar(statement) or 0
 
-    def count_permanent_blocks(
-        self,
-    ) -> int:
+    def count_permanent_blocks( self ) -> int:
 
         statement = (
             select(
