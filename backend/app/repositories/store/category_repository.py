@@ -144,6 +144,45 @@ class CategoryRepository(
             )
         )
 
-        return list(
-            self.db.scalars(statement)
+        return list( self.db.scalars(statement) )
+    
+    def get_active_by_slug( self, slug: str ) -> Category | None:
+
+        statement = (
+            select(Category)
+            .where(
+                Category.slug == slug,
+            )
+            .where(
+                Category.is_active.is_(True),
+            )
         )
+
+        return self.db.scalar(statement)
+
+
+    def get_active_by_public_id( self, public_id: str ) -> Category | None:
+
+        statement = (
+            select(Category)
+            .where(
+                Category.public_id == public_id,
+            )
+            .where(
+                Category.is_active.is_(True),
+            )
+        )
+
+        return self.db.scalar(statement)
+
+
+    def exists_by_public_id( self, public_id: str ) -> bool:
+
+        statement = (
+            select(Category.id)
+            .where(
+                Category.public_id == public_id,
+            )
+        )
+
+        return self.db.scalar(statement) is not None

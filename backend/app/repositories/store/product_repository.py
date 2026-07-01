@@ -162,10 +162,7 @@ class ProductRepository(
             self.db.scalars(statement)
         )
 
-    def get_product_details(
-        self,
-        public_id: str,
-    ) -> Product | None:
+    def get_details_by_public_id( self, public_id: str ) -> Product | None:
 
         statement = (
             select(Product)
@@ -205,3 +202,41 @@ class ProductRepository(
         return list(
             self.db.scalars(statement)
         )
+   
+    def get_active_by_slug( self, slug: str) -> Product | None:
+
+        statement = (
+            select(Product)
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+                selectinload(Product.reviews),
+            )
+            .where(
+                Product.slug == slug,
+            )
+            .where(
+                Product.is_active.is_(True),
+            )
+        )
+
+        return self.db.scalar(statement)
+    
+    def get_active_by_public_id( self, public_id: str ) -> Product | None:
+
+        statement = (
+            select(Product)
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+                selectinload(Product.reviews),
+            )
+            .where(
+                Product.public_id == public_id,
+            )
+            .where(
+                Product.is_active.is_(True),
+            )
+        )
+
+        return self.db.scalar(statement)
