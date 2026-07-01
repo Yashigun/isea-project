@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
 
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,23 +18,33 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "shop.vimsy",
-  description: "Crochet shop",
+  description: "Boutique Store",
 };
 
 export default function RootLayout({
   children,
-
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        {children}
+    <html lang="en">
+
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+
+        <Navbar />
+
+        <main className="min-h-screen">
+
+          {children}
+
+        </main>
+
+        <Footer />
+
       </body>
+
     </html>
   );
 }
