@@ -1,10 +1,10 @@
-import Image from "next/image";
-
 import { Product } from "@/types/product";
 
-import WishlistButton from "./common/wishlistButton";
-import ProductPrice from "./common/productPrice";
-import AddToCartButton from "./common/addToCart";
+import AddToCartButton from "./common/AddToCartButton";
+import ProductPrice from "./common/ProductPrice";
+import ProductImage from "./ProductImage";
+import Link from "next/dist/client/link";
+
 
 interface ProductCardProps {
   product: Product;
@@ -14,56 +14,43 @@ export default function ProductCard({
   product,
 }: ProductCardProps) {
   return (
-    <article
-      className="
-        group
-        overflow-hidden
-        rounded-[32px]
-        bg-white
-        p-4
-        transition-all
-        duration-300
-        hover:-translate-y-2
-        hover:shadow-[0_22px_45px_rgba(220,38,38,0.18)]
-      "
-    >
-      <div className="relative">
-
-        <Image
-          src={product.image}
-          alt={product.name}
-          width={600}
-          height={600}
-          className="
-            aspect-square
-            w-full
-            rounded-[28px]
-            object-cover
-          "
+    <Link href={`/products/${product.slug}`} className="block">
+      <article
+        className="
+          group
+          rounded-[36px]
+          
+          p-4
+          transition-all
+          duration-300
+          hover:-translate-y-2
+          hover:shadow-[0_25px_45px_rgba(220,38,38,0.18)]
+        "
+      >
+        <ProductImage
+          image={product.images[0]}
+          name={product.name}
         />
 
-        <WishlistButton />
+        <div className="mt-5 space-y-5">
 
-      </div>
+          <div>
 
-      <div className="mt-5 space-y-4">
+            <h3 className="text-2xl font-medium">
+              {product.name}
+            </h3>
 
-        <div>
+            <ProductPrice
+              price={product.price}
+              discountPrice={product.discountPrice}
+            />
 
-          <h3 className="text-2xl font-medium">
-            {product.name}
-          </h3>
+          </div>
 
-          <ProductPrice
-            price={product.price}
-          />
+          <AddToCartButton />
 
         </div>
-
-        <AddToCartButton />
-
-      </div>
-
-    </article>
+      </article>
+    </Link>
   );
 }

@@ -14,19 +14,20 @@ export default function WishlistButton({
   return (
     <button
       type="button"
-      aria-label="Add to wishlist"
       onClick={onClick}
+      aria-label="Wishlist"
       className="
         absolute
         right-4
         top-4
+        z-10
         flex
         h-11
         w-11
         items-center
         justify-center
         rounded-full
-        bg-white/95
+        bg-white
         shadow-md
         transition-all
         duration-300
@@ -38,7 +39,7 @@ export default function WishlistButton({
         className={
           active
             ? "fill-red-500 text-red-500"
-            : "text-gray-700"
+            : "text-black"
         }
       />
     </button>

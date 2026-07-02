@@ -15,14 +15,14 @@ export default function AddToCartButton({
       onClick={onClick}
       className="
         flex
+        w-full
         items-center
+        justify-center
         gap-2
         rounded-full
         border
         border-black
-        px-5
-        py-2
-        text-sm
+        py-3
         transition-all
         duration-300
         hover:bg-black
