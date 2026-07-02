@@ -48,7 +48,7 @@ class CustomerSession( Base, UUIDMixin, TimestampMixin):
     )
 
     refresh_token_hash: Mapped[str] = mapped_column(
-        String(64),
+        String(255),
         nullable=False,
         unique=True,
         index=True,
@@ -105,10 +105,9 @@ class CustomerSession( Base, UUIDMixin, TimestampMixin):
         nullable=False,
     )
 
-    revoked: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False,
+    revoked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     customer: Mapped["Customer"] = relationship(

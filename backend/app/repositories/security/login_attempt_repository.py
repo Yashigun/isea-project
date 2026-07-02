@@ -29,7 +29,19 @@ class LoginAttemptRepository(
     ) -> None:
 
         super().__init__(db)
+    # ---------------------------------------------------------
+    # Create
+    # ---------------------------------------------------------
 
+    def create(
+        self,
+        attempt: LoginAttempt,
+    ) -> LoginAttempt:
+        """
+        Persist a login attempt.
+        """
+
+        return self.add(attempt)
     # ---------------------------------------------------------
     # Read
     # ---------------------------------------------------------

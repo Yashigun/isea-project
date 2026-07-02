@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+
+from datetime import datetime
 from uuid import UUID
+
+
 
 from sqlalchemy import (
     select,
@@ -42,7 +46,7 @@ class CustomerSessionRepository(
         session: CustomerSession,
     ) -> CustomerSession:
 
-        return self.add(session)
+        return self.create(session)
 
     # ---------------------------------------------------------
     # Read
@@ -172,3 +176,13 @@ class CustomerSessionRepository(
     ) -> None:
 
         self.delete(session)
+        
+    def revoke(
+        self,
+        session: CustomerSession,
+        revoked_at: datetime,
+    ) -> CustomerSession:
+
+        session.revoked_at = revoked_at
+
+        return self.save(session)

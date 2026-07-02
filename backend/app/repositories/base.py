@@ -1,9 +1,6 @@
 from __future__ import annotations
 
-from typing import (
-    Generic,
-    TypeVar,
-)
+from typing import Generic, TypeVar
 
 from sqlalchemy.orm import Session
 
@@ -24,39 +21,36 @@ class BaseRepository(Generic[ModelType]):
 
         self.db = db
 
-    def add(
+    # ---------------------------------------------------------
+    # Create
+    # ---------------------------------------------------------
+
+    def create(
         self,
         instance: ModelType,
     ) -> ModelType:
         """
-        Add a model instance to the session.
+        Add a model instance to the current
+        SQLAlchemy session.
         """
 
         self.db.add(instance)
 
         return instance
 
-    def flush(self) -> None:
+    # ---------------------------------------------------------
+    # Persistence
+    # ---------------------------------------------------------
+
+    def flush(
+        self,
+    ) -> None:
         """
         Flush pending changes to the database
         without committing.
         """
 
         self.db.flush()
-
-    def commit(self) -> None:
-        """
-        Commit the current transaction.
-        """
-
-        self.db.commit()
-
-    def rollback(self) -> None:
-        """
-        Roll back the current transaction.
-        """
-
-        self.db.rollback()
 
     def refresh(
         self,
@@ -68,29 +62,16 @@ class BaseRepository(Generic[ModelType]):
 
         self.db.refresh(instance)
 
-    def delete(
-        self,
-        instance: ModelType,
-    ) -> None:
-        """
-        Delete a model instance.
-        """
-
-        self.db.delete(instance)
-        
-    def create(
-        self,
-        instance: ModelType,
-    ) -> ModelType:
-
-        self.db.add(instance)
-
-        return instance
-
     def save(
         self,
         instance: ModelType,
     ) -> ModelType:
+        """
+        Flush pending changes and refresh
+        the instance.
+
+        Does NOT commit the transaction.
+        """
 
         self.flush()
 
@@ -98,9 +79,34 @@ class BaseRepository(Generic[ModelType]):
 
         return instance
 
+    def commit(
+        self,
+    ) -> None:
+        """
+        Commit the current transaction.
+        """
+
+        self.db.commit()
+
+    def rollback(
+        self,
+    ) -> None:
+        """
+        Roll back the current transaction.
+        """
+
+        self.db.rollback()
+
+    # ---------------------------------------------------------
+    # Delete
+    # ---------------------------------------------------------
+
     def remove(
         self,
         instance: ModelType,
     ) -> None:
+        """
+        Mark an instance for deletion.
+        """
 
         self.db.delete(instance)

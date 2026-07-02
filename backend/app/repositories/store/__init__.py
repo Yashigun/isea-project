@@ -2,7 +2,7 @@ from .address_repository import AddressRepository
 from .cart_repository import CartRepository
 from .category_repository import CategoryRepository
 from .customer_repository import CustomerRepository
-from .customer_session_repository import CustomerSessionRepository
+from ..security.customer_session_repository import CustomerSessionRepository
 from .order_repository import OrderRepository
 from .product_repository import ProductRepository
 from .product_image_repository import ProductImageRepository

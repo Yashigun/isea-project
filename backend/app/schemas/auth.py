@@ -281,3 +281,7 @@ class AuthenticatedCustomerSchema(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
     )
+    
+class AuthenticationResponseSchema(BaseModel):
+    customer: AuthenticatedCustomerSchema
+    tokens: TokenResponseSchema

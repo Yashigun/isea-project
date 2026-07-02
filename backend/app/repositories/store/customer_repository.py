@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -36,7 +37,7 @@ class CustomerRepository(
         Add a customer to the current transaction.
         """
 
-        return self.add(customer)
+        return self.create(customer)
 
     # ---------------------------------------------------------
     # Read
@@ -127,3 +128,13 @@ class CustomerRepository(
     ) -> None:
 
         self.delete(customer)
+        
+    def update_last_login(
+        self,
+        customer: Customer,
+        logged_in_at: datetime,
+    ) -> Customer:
+
+        customer.last_login_at = logged_in_at
+
+        return self.save(customer)
