@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from app.db.database import Base
-from app.models.base import UUIDMixin, TimestampMixin
+from app.models.base import UUIDMixin, TimestampMixin, PublicIdMixin
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Text, Boolean
 
-class Category(Base, UUIDMixin, TimestampMixin):
+class Category(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     __tablename__ = "categories"
     
     __table_args__ = {

@@ -1,4 +1,4 @@
-from backend.app.models.security.security_event import EventSeverity
+from app.models.security.security_event import EventSeverity
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 from uuid import UUID
-from backend.app.models.security.request_log import RequestLog
+from app.models.security.request_log import RequestLog
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func, select
 
@@ -188,31 +188,31 @@ class SecurityService:
         rows = result.all()
         return [{"ip": row[0], "count": row[1]} for row in rows]
     
-# Add to app/services/security_service.py
-    async def create_security_event_async(
-        event_type: str,
-        severity: str,
-        title: str,
-        description: str,
-        ip: str,
-        request_id: Optional[str] = None,
-        evidence: Optional[dict] = None,
-    ) -> None:
-        from app.db.database import AsyncSessionLocal
-        from app.models.security.security_event import SecurityEventType, EventSeverity
-        from app.repositories.security_event_repository import SecurityEventRepository
 
-        async with AsyncSessionLocal() as db:
-            repo = SecurityEventRepository(db)
-            event = SecurityEvent(
-                request_id=request_id,
-                event_type=SecurityEventType(event_type),
-                severity=EventSeverity(severity),
-                title=title,
-                description=description,
-                ip_address=ip,
-                evidence=evidence,
-                resolved=False,
-            )
-            await repo.create(event)
-            await db.commit()
+async def create_security_event_async(
+    event_type: str,
+    severity: str,
+    title: str,
+    description: str,
+    ip: str,
+    request_id: Optional[str] = None,
+    evidence: Optional[dict] = None,
+) -> None:
+    from app.db.database import AsyncSessionLocal
+    from app.models.security.security_event import SecurityEventType, EventSeverity
+    from app.repositories.security.security_event_repository import SecurityEventRepository
+
+    async with AsyncSessionLocal() as db:
+        repo = SecurityEventRepository(db)
+        event = SecurityEvent(
+            request_id=request_id,
+            event_type=SecurityEventType(event_type),
+            severity=EventSeverity(severity),
+            title=title,
+            description=description,
+            ip_address=ip,
+            evidence=evidence,
+            resolved=False,
+        )
+        await repo.create(event)
+        await db.commit()

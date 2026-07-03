@@ -14,10 +14,10 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
-from app.models.base import TimestampMixin, UUIDMixin
+from app.models.base import TimestampMixin, UUIDMixin, PublicIdMixin
 
 
-class Product(Base, UUIDMixin, TimestampMixin):
+class Product(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     __tablename__ = "products"
 
     __table_args__ = (

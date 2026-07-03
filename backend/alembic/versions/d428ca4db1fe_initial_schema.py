@@ -1,8 +1,8 @@
 """initial schema
 
-Revision ID: a7f7d07fa686
+Revision ID: d428ca4db1fe
 Revises: 
-Create Date: 2026-07-03 17:32:56.820791
+Create Date: 2026-07-03 20:56:30.583957
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'a7f7d07fa686'
+revision: str = 'd428ca4db1fe'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -44,10 +44,12 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name'),
     schema='store'
     )
+    op.create_index(op.f('ix_store_categories_public_id'), 'categories', ['public_id'], unique=True, schema='store')
     op.create_index(op.f('ix_store_categories_slug'), 'categories', ['slug'], unique=True, schema='store')
     op.create_table('customers',
     sa.Column('first_name', sa.String(length=100), nullable=False),
@@ -65,12 +67,14 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     schema='store'
     )
     op.create_index(op.f('ix_store_customers_email'), 'customers', ['email'], unique=True, schema='store')
     op.create_index(op.f('ix_store_customers_google_id'), 'customers', ['google_id'], unique=True, schema='store')
     op.create_index(op.f('ix_store_customers_is_admin'), 'customers', ['is_admin'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_customers_public_id'), 'customers', ['public_id'], unique=True, schema='store')
     op.create_table('audit_logs',
     sa.Column('request_id', sa.String(length=64), nullable=False),
     sa.Column('customer_id', sa.UUID(), nullable=True),
@@ -110,6 +114,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.CheckConstraint('expires_at > login_at', name='ck_customer_session_expiry'),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
@@ -117,6 +122,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_security_customer_sessions_customer_id'), 'customer_sessions', ['customer_id'], unique=False, schema='security')
     op.create_index(op.f('ix_security_customer_sessions_ip_address'), 'customer_sessions', ['ip_address'], unique=False, schema='security')
+    op.create_index(op.f('ix_security_customer_sessions_public_id'), 'customer_sessions', ['public_id'], unique=True, schema='security')
     op.create_index(op.f('ix_security_customer_sessions_refresh_token_hash'), 'customer_sessions', ['refresh_token_hash'], unique=True, schema='security')
     op.create_table('login_attempts',
     sa.Column('customer_id', sa.UUID(), nullable=True),
@@ -143,11 +149,13 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     schema='store'
     )
     op.create_index(op.f('ix_store_carts_customer_id'), 'carts', ['customer_id'], unique=True, schema='store')
+    op.create_index(op.f('ix_store_carts_public_id'), 'carts', ['public_id'], unique=True, schema='store')
     op.create_table('customer_addresses',
     sa.Column('customer_id', sa.UUID(), nullable=False),
     sa.Column('address_line_1', sa.String(length=255), nullable=False),
@@ -160,11 +168,13 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     schema='store'
     )
     op.create_index(op.f('ix_store_customer_addresses_customer_id'), 'customer_addresses', ['customer_id'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_customer_addresses_public_id'), 'customer_addresses', ['public_id'], unique=True, schema='store')
     op.create_table('orders',
     sa.Column('customer_id', sa.UUID(), nullable=False),
     sa.Column('status', sa.Enum('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED', name='orderstatus'), nullable=False),
@@ -204,11 +214,13 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     schema='store'
     )
     op.create_index(op.f('ix_store_phone_numbers_customer_id'), 'phone_numbers', ['customer_id'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_phone_numbers_public_id'), 'phone_numbers', ['public_id'], unique=True, schema='store')
     op.create_table('products',
     sa.Column('category_id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(length=200), nullable=False),
@@ -221,6 +233,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.CheckConstraint('discount_price IS NULL OR discount_price <= price', name='ck_product_discount_price'),
     sa.CheckConstraint('price > 0', name='ck_product_price_positive'),
     sa.ForeignKeyConstraint(['category_id'], ['store.categories.id'], ondelete='RESTRICT'),
@@ -229,6 +242,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_store_products_category_id'), 'products', ['category_id'], unique=False, schema='store')
     op.create_index(op.f('ix_store_products_name'), 'products', ['name'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_products_public_id'), 'products', ['public_id'], unique=True, schema='store')
     op.create_index(op.f('ix_store_products_slug'), 'products', ['slug'], unique=True, schema='store')
     op.create_table('request_logs',
     sa.Column('request_id', sa.String(length=64), nullable=False),
@@ -297,6 +311,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.CheckConstraint('quantity > 0', name='ck_cart_item_quantity_positive'),
     sa.ForeignKeyConstraint(['cart_id'], ['store.carts.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['product_id'], ['store.products.id'], ondelete='CASCADE'),
@@ -306,6 +321,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_store_cart_items_cart_id'), 'cart_items', ['cart_id'], unique=False, schema='store')
     op.create_index(op.f('ix_store_cart_items_product_id'), 'cart_items', ['product_id'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_cart_items_public_id'), 'cart_items', ['public_id'], unique=True, schema='store')
     op.create_table('order_items',
     sa.Column('order_id', sa.UUID(), nullable=False),
     sa.Column('product_id', sa.UUID(), nullable=True),
@@ -316,6 +332,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.CheckConstraint('quantity > 0', name='ck_order_item_quantity_positive'),
     sa.CheckConstraint('subtotal >= 0', name='ck_order_item_subtotal_positive'),
     sa.CheckConstraint('unit_price > 0', name='ck_order_item_unit_price_positive'),
@@ -326,6 +343,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_store_order_items_order_id'), 'order_items', ['order_id'], unique=False, schema='store')
     op.create_index(op.f('ix_store_order_items_product_id'), 'order_items', ['product_id'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_order_items_public_id'), 'order_items', ['public_id'], unique=True, schema='store')
     op.create_table('payments',
     sa.Column('order_id', sa.UUID(), nullable=False),
     sa.Column('payment_method', sa.Enum('CARD', 'UPI', 'NET_BANKING', name='paymentmethod'), nullable=False),
@@ -379,6 +397,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.CheckConstraint('rating >= 1 AND rating <= 5', name='ck_review_rating_range'),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['product_id'], ['store.products.id'], ondelete='CASCADE'),
@@ -388,12 +407,14 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_store_product_reviews_customer_id'), 'product_reviews', ['customer_id'], unique=False, schema='store')
     op.create_index(op.f('ix_store_product_reviews_product_id'), 'product_reviews', ['product_id'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_product_reviews_public_id'), 'product_reviews', ['public_id'], unique=True, schema='store')
     op.create_table('wishlist_item',
     sa.Column('customer_id', sa.UUID(), nullable=False),
     sa.Column('product_id', sa.UUID(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['product_id'], ['store.products.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
@@ -402,15 +423,18 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_store_wishlist_item_customer_id'), 'wishlist_item', ['customer_id'], unique=False, schema='store')
     op.create_index(op.f('ix_store_wishlist_item_product_id'), 'wishlist_item', ['product_id'], unique=False, schema='store')
+    op.create_index(op.f('ix_store_wishlist_item_public_id'), 'wishlist_item', ['public_id'], unique=True, schema='store')
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_store_wishlist_item_public_id'), table_name='wishlist_item', schema='store')
     op.drop_index(op.f('ix_store_wishlist_item_product_id'), table_name='wishlist_item', schema='store')
     op.drop_index(op.f('ix_store_wishlist_item_customer_id'), table_name='wishlist_item', schema='store')
     op.drop_table('wishlist_item', schema='store')
+    op.drop_index(op.f('ix_store_product_reviews_public_id'), table_name='product_reviews', schema='store')
     op.drop_index(op.f('ix_store_product_reviews_product_id'), table_name='product_reviews', schema='store')
     op.drop_index(op.f('ix_store_product_reviews_customer_id'), table_name='product_reviews', schema='store')
     op.drop_table('product_reviews', schema='store')
@@ -422,9 +446,11 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_store_payments_public_id'), table_name='payments', schema='store')
     op.drop_index(op.f('ix_store_payments_order_id'), table_name='payments', schema='store')
     op.drop_table('payments', schema='store')
+    op.drop_index(op.f('ix_store_order_items_public_id'), table_name='order_items', schema='store')
     op.drop_index(op.f('ix_store_order_items_product_id'), table_name='order_items', schema='store')
     op.drop_index(op.f('ix_store_order_items_order_id'), table_name='order_items', schema='store')
     op.drop_table('order_items', schema='store')
+    op.drop_index(op.f('ix_store_cart_items_public_id'), table_name='cart_items', schema='store')
     op.drop_index(op.f('ix_store_cart_items_product_id'), table_name='cart_items', schema='store')
     op.drop_index(op.f('ix_store_cart_items_cart_id'), table_name='cart_items', schema='store')
     op.drop_table('cart_items', schema='store')
@@ -442,16 +468,20 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_security_request_logs_customer_id'), table_name='request_logs', schema='security')
     op.drop_table('request_logs', schema='security')
     op.drop_index(op.f('ix_store_products_slug'), table_name='products', schema='store')
+    op.drop_index(op.f('ix_store_products_public_id'), table_name='products', schema='store')
     op.drop_index(op.f('ix_store_products_name'), table_name='products', schema='store')
     op.drop_index(op.f('ix_store_products_category_id'), table_name='products', schema='store')
     op.drop_table('products', schema='store')
+    op.drop_index(op.f('ix_store_phone_numbers_public_id'), table_name='phone_numbers', schema='store')
     op.drop_index(op.f('ix_store_phone_numbers_customer_id'), table_name='phone_numbers', schema='store')
     op.drop_table('phone_numbers', schema='store')
     op.drop_index(op.f('ix_store_orders_public_id'), table_name='orders', schema='store')
     op.drop_index(op.f('ix_store_orders_customer_id'), table_name='orders', schema='store')
     op.drop_table('orders', schema='store')
+    op.drop_index(op.f('ix_store_customer_addresses_public_id'), table_name='customer_addresses', schema='store')
     op.drop_index(op.f('ix_store_customer_addresses_customer_id'), table_name='customer_addresses', schema='store')
     op.drop_table('customer_addresses', schema='store')
+    op.drop_index(op.f('ix_store_carts_public_id'), table_name='carts', schema='store')
     op.drop_index(op.f('ix_store_carts_customer_id'), table_name='carts', schema='store')
     op.drop_table('carts', schema='store')
     op.drop_index(op.f('ix_security_login_attempts_request_id'), table_name='login_attempts', schema='security')
@@ -460,6 +490,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_security_login_attempts_customer_id'), table_name='login_attempts', schema='security')
     op.drop_table('login_attempts', schema='security')
     op.drop_index(op.f('ix_security_customer_sessions_refresh_token_hash'), table_name='customer_sessions', schema='security')
+    op.drop_index(op.f('ix_security_customer_sessions_public_id'), table_name='customer_sessions', schema='security')
     op.drop_index(op.f('ix_security_customer_sessions_ip_address'), table_name='customer_sessions', schema='security')
     op.drop_index(op.f('ix_security_customer_sessions_customer_id'), table_name='customer_sessions', schema='security')
     op.drop_table('customer_sessions', schema='security')
@@ -468,11 +499,13 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_security_audit_logs_entity_public_id'), table_name='audit_logs', schema='security')
     op.drop_index(op.f('ix_security_audit_logs_customer_id'), table_name='audit_logs', schema='security')
     op.drop_table('audit_logs', schema='security')
+    op.drop_index(op.f('ix_store_customers_public_id'), table_name='customers', schema='store')
     op.drop_index(op.f('ix_store_customers_is_admin'), table_name='customers', schema='store')
     op.drop_index(op.f('ix_store_customers_google_id'), table_name='customers', schema='store')
     op.drop_index(op.f('ix_store_customers_email'), table_name='customers', schema='store')
     op.drop_table('customers', schema='store')
     op.drop_index(op.f('ix_store_categories_slug'), table_name='categories', schema='store')
+    op.drop_index(op.f('ix_store_categories_public_id'), table_name='categories', schema='store')
     op.drop_table('categories', schema='store')
     op.drop_index(op.f('ix_security_blocked_ips_ip_address'), table_name='blocked_ips', schema='security')
     op.drop_table('blocked_ips', schema='security')

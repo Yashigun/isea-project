@@ -21,11 +21,12 @@ from app.db.database import Base
 from app.models.base import (
     UUIDMixin,
     TimestampMixin,
+    PublicIdMixin
 )
 from app.models.store.customer import Customer
 
 
-class CustomerSession( Base, UUIDMixin, TimestampMixin):
+class CustomerSession( Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     __tablename__ = "customer_sessions"
 
     __table_args__ = (

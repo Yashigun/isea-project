@@ -17,13 +17,14 @@ from sqlalchemy.orm import (
 )
 
 from app.db.database import Base
-from app.models.base import UUIDMixin, TimestampMixin
+from app.models.base import UUIDMixin, TimestampMixin, PublicIdMixin
 
 
 class ProductReview(
     Base,
     UUIDMixin,
     TimestampMixin,
+    PublicIdMixin
 ):
     __tablename__ = "product_reviews"
 

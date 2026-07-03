@@ -5,7 +5,7 @@ from sqlalchemy import DateTime, Enum as SQLEnum, Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
-from app.models.base import TimestampMixin, UUIDMixin
+from app.models.base import TimestampMixin, UUIDMixin, PublicIdMixin
 
 from typing import Optional
 
@@ -27,7 +27,7 @@ class AuthProvider(str, Enum):
     GOOGLE = "google"
 
 
-class Customer(Base, UUIDMixin, TimestampMixin):
+class Customer(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     __tablename__ = "customers"
 
     __table_args__ = {

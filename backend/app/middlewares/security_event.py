@@ -2,7 +2,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request
 import re
 import asyncio
-from app.services.security_service import create_security_event  # we'll define this helper below
+from app.services.security.security_service import create_security_event_async
 
 
 # Patterns for detection
@@ -64,7 +64,7 @@ class SecurityEventMiddleware(BaseHTTPMiddleware):
 
     async def _create_event(self, event_type, severity, title, description, ip, request):
         # Use background task to avoid blocking
-        from app.services.security_service import create_security_event_async
+        
         asyncio.create_task(create_security_event_async(
             event_type=event_type,
             severity=severity,

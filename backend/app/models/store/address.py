@@ -14,10 +14,10 @@ from sqlalchemy.orm import (
 )
 
 from app.db.database import Base
-from app.models.base import UUIDMixin, TimestampMixin
+from app.models.base import UUIDMixin, TimestampMixin, PublicIdMixin
 
 
-class Address( Base, UUIDMixin, TimestampMixin):
+class Address( Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     __tablename__ = "customer_addresses"
 
     __table_args__ = {

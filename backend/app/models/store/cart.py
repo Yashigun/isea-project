@@ -6,13 +6,14 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
-from app.models.base import UUIDMixin, TimestampMixin
+from app.models.base import UUIDMixin, TimestampMixin, PublicIdMixin
 
 
 class Cart(
     Base,
     UUIDMixin,
     TimestampMixin,
+    PublicIdMixin
 ):
     __tablename__ = "carts"
 

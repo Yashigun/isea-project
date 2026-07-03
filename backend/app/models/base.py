@@ -5,7 +5,13 @@ import secrets
 from sqlalchemy import DateTime, func, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
+import secrets
+import string
 
+ALPHABET = string.ascii_uppercase + string.digits
+
+def generate_public_id(length: int = 16) -> str:
+    return "".join(secrets.choice(ALPHABET) for _ in range(length))
 
 class UUIDMixin:
     id: Mapped[uuid.UUID] = mapped_column(
@@ -29,13 +35,12 @@ class TimestampMixin:
     nullable=False,
 )
     
-    
-
 class PublicIdMixin:
+
     public_id: Mapped[str] = mapped_column(
         String(16),
         unique=True,
-        index=True,
         nullable=False,
-        default=lambda: secrets.token_urlsafe(12)[:16],
+        index=True,
+        default=generate_public_id,
     )
