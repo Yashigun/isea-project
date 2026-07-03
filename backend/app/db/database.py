@@ -1,28 +1,26 @@
-import os
-from dotenv import load_dotenv
-from pathlib import Path
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from app.core.config import settings
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.ext.asyncio import (
-    create_async_engine,
-    async_sessionmaker,
-    AsyncSession,
-)
-
-load_dotenv(Path(".env"))
-
-DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_async_engine(
-    DATABASE_URL,
-    echo=True,
+    settings.DATABASE_URL,
+    echo=settings.DEBUG,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
 )
 
 AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
+    engine,
     class_=AsyncSession,
     expire_on_commit=False,
+    autocommit=False,
+    autoflush=False,
 )
 
-
+async def get_db() -> AsyncSession:
+    async with AsyncSessionLocal() as session:
+        yield session
+        
 class Base(DeclarativeBase):
-    pass
+     pass

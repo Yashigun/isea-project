@@ -2,131 +2,66 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import (
-    func,
-    select,
-)
-
-from sqlalchemy.orm import Session
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.store.address import Address
 from app.repositories.base import BaseRepository
 
 
-class AddressRepository(
-    BaseRepository[Address],
-):
+class AddressRepository(BaseRepository[Address]):
     """
-    Repository responsible for customer
-    address database operations.
+    Repository responsible for customer address database operations.
     """
 
-    def __init__(
-        self,
-        db: Session,
-    ) -> None:
-
+    def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
+
+    def _get_model(self) -> type[Address]:
+        return Address
 
     # ---------------------------------------------------------
     # Read
     # ---------------------------------------------------------
 
-    def get_by_id(
-        self,
-        address_id: UUID,
-    ) -> Address | None:
+    async def get_by_id(self, address_id: UUID) -> Address | None:
+        stmt = select(Address).where(Address.id == address_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        statement = (
+    async def get_by_public_id(self, public_id: str) -> Address | None:
+        stmt = select(Address).where(Address.public_id == public_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_customer_addresses(self, customer_id: UUID) -> list[Address]:
+        stmt = (
             select(Address)
-            .where(
-                Address.id == address_id,
-            )
+            .where(Address.customer_id == customer_id)
+            .order_by(Address.is_default.desc(), Address.created_at.desc())
         )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
-        return self.db.scalar(statement)
-
-    def get_by_public_id(
-        self,
-        public_id: str,
-    ) -> Address | None:
-
-        statement = (
+    async def get_default_address(self, customer_id: UUID) -> Address | None:
+        stmt = (
             select(Address)
-            .where(
-                Address.public_id == public_id,
-            )
+            .where(Address.customer_id == customer_id)
+            .where(Address.is_default.is_(True))
         )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        return self.db.scalar(statement)
+    async def count_customer_addresses(self, customer_id: UUID) -> int:
+        stmt = select(func.count(Address.id)).where(Address.customer_id == customer_id)
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0
 
-    def get_customer_addresses(
-        self,
-        customer_id: UUID,
-    ) -> list[Address]:
-
-        statement = (
-            select(Address)
-            .where(
-                Address.customer_id == customer_id,
-            )
-            .order_by(
-                Address.is_default.desc(),
-                Address.created_at.desc(),
-            )
-        )
-
-        return list(
-            self.db.scalars(statement)
-        )
-
-    def get_default_address(
-        self,
-        customer_id: UUID,
-    ) -> Address | None:
-
-        statement = (
-            select(Address)
-            .where(
-                Address.customer_id == customer_id,
-            )
-            .where(
-                Address.is_default.is_(True),
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def count_customer_addresses(
-        self,
-        customer_id: UUID,
-    ) -> int:
-
-        statement = (
-            select(
-                func.count(Address.id)
-            )
-            .where(
-                Address.customer_id == customer_id,
-            )
-        )
-
-        return self.db.scalar(statement) or 0
-
-    def exists(
-        self,
-        customer_id: UUID,
-        address_id: UUID,
-    ) -> bool:
-
-        statement = (
+    async def exists(self, customer_id: UUID, address_id: UUID) -> bool:
+        stmt = (
             select(Address.id)
-            .where(
-                Address.customer_id == customer_id,
-            )
-            .where(
-                Address.id == address_id,
-            )
+            .where(Address.customer_id == customer_id)
+            .where(Address.id == address_id)
         )
-
-        return self.db.scalar(statement) is not None
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none() is not None

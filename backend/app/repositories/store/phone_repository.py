@@ -2,159 +2,76 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import (
-    func,
-    select,
-)
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.orm import Session
-
-from app.models.store.phone import Phone
+from app.models.store.phone_number import PhoneNumber
 from app.repositories.base import BaseRepository
 
 
-class PhoneRepository(
-    BaseRepository[Phone],
-):
+class PhoneRepository(BaseRepository[PhoneNumber]):
     """
-    Repository responsible for customer
-    phone number database operations.
+    Repository responsible for customer phone number database operations.
     """
 
-    def __init__(
-        self,
-        db: Session,
-    ) -> None:
-
+    def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
+
+    def _get_model(self) -> type[PhoneNumber]:
+        return PhoneNumber
 
     # ---------------------------------------------------------
     # Read
     # ---------------------------------------------------------
 
-    def get_by_id(
-        self,
-        phone_id: UUID,
-    ) -> Phone | None:
+    async def get_by_id(self, phone_id: UUID) -> PhoneNumber | None:
+        stmt = select(PhoneNumber).where(PhoneNumber.id == phone_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        statement = (
-            select(Phone)
-            .where(
-                Phone.id == phone_id,
-            )
+    async def get_by_public_id(self, public_id: str) -> PhoneNumber | None:
+        stmt = select(PhoneNumber).where(PhoneNumber.public_id == public_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_customer_phone_numbers(self, customer_id: UUID) -> list[PhoneNumber]:
+        stmt = (
+            select(PhoneNumber)
+            .where(PhoneNumber.customer_id == customer_id)
+            .order_by(PhoneNumber.is_default.desc(), PhoneNumber.created_at.desc())
         )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
-        return self.db.scalar(statement)
-
-    def get_by_public_id(
-        self,
-        public_id: str,
-    ) -> Phone | None:
-
-        statement = (
-            select(Phone)
-            .where(
-                Phone.public_id == public_id,
-            )
+    async def get_default_phone(self, customer_id: UUID) -> PhoneNumber | None:
+        stmt = (
+            select(PhoneNumber)
+            .where(PhoneNumber.customer_id == customer_id)
+            .where(PhoneNumber.is_default.is_(True))
         )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        return self.db.scalar(statement)
+    async def count_customer_phone_numbers(self, customer_id: UUID) -> int:
+        stmt = select(func.count(PhoneNumber.id)).where(PhoneNumber.customer_id == customer_id)
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0
 
-    def get_customer_phone_numbers(
-        self,
-        customer_id: UUID,
-    ) -> list[Phone]:
-
-        statement = (
-            select(Phone)
-            .where(
-                Phone.customer_id == customer_id,
-            )
-            .order_by(
-                Phone.is_default.desc(),
-                Phone.created_at.desc(),
-            )
+    async def belongs_to_customer(self, customer_id: UUID, phone_id: UUID) -> bool:
+        stmt = (
+            select(PhoneNumber.id)
+            .where(PhoneNumber.customer_id == customer_id)
+            .where(PhoneNumber.id == phone_id)
         )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none() is not None
 
-        return list(
-            self.db.scalars(statement)
-        )
+    async def get_by_phone_number(self, phone_number: str) -> PhoneNumber | None:
+        stmt = select(PhoneNumber).where(PhoneNumber.phone_number == phone_number)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-    def get_default_phone(
-        self,
-        customer_id: UUID,
-    ) -> Phone | None:
-
-        statement = (
-            select(Phone)
-            .where(
-                Phone.customer_id == customer_id,
-            )
-            .where(
-                Phone.is_default.is_(True),
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def count_customer_phone_numbers(
-        self,
-        customer_id: UUID,
-    ) -> int:
-
-        statement = (
-            select(
-                func.count(Phone.id)
-            )
-            .where(
-                Phone.customer_id == customer_id,
-            )
-        )
-
-        return self.db.scalar(statement) or 0
-
-    def belongs_to_customer(
-        self,
-        customer_id: UUID,
-        phone_id: UUID,
-    ) -> bool:
-
-        statement = (
-            select(Phone.id)
-            .where(
-                Phone.customer_id == customer_id,
-            )
-            .where(
-                Phone.id == phone_id,
-            )
-        )
-
-        return self.db.scalar(statement) is not None
-
-    def get_by_phone_number(
-        self,
-        phone_number: str,
-    ) -> Phone | None:
-
-        statement = (
-            select(Phone)
-            .where(
-                Phone.phone_number == phone_number,
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def exists_by_phone_number(
-        self,
-        phone_number: str,
-    ) -> bool:
-
-        statement = (
-            select(Phone.id)
-            .where(
-                Phone.phone_number == phone_number,
-            )
-        )
-
-        return self.db.scalar(statement) is not None
+    async def exists_by_phone_number(self, phone_number: str) -> bool:
+        stmt = select(PhoneNumber.id).where(PhoneNumber.phone_number == phone_number)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none() is not None

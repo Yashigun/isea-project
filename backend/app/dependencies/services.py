@@ -1,33 +1,69 @@
 from __future__ import annotations
 
 from fastapi import Depends
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.dependencies.database import get_db
+from app.db.database import get_db
 
-from app.services.storefront.category_service import (
-    CategoryService,
-)
-from app.services.storefront.product_service import (
-    ProductService,
-)
+# Services
+from app.services.auth_service import AuthService
+from app.services.product_service import ProductService
+from app.services.category_service import CategoryService
+from app.services.cart_service import CartService
+from app.services.order_service import OrderService
+from app.services.address_service import AddressService
+from app.services.phone_service import PhoneService
+from app.services.wishlist_service import WishlistService
+from app.services.review_service import ReviewService
+from app.services.security_service import SecurityService
 
+# Async dependencies
+async def get_auth_service(
+    db: AsyncSession = Depends(get_db),
+) -> AuthService:
+    return AuthService(db)
 
-def get_category_service(
-    db: Session = Depends(get_db),
+async def get_product_service(
+    db: AsyncSession = Depends(get_db),
+) -> ProductService:
+    return ProductService(db)
+
+async def get_category_service(
+    db: AsyncSession = Depends(get_db),
 ) -> CategoryService:
-    """
-    Dependency that provides a CategoryService.
-    """
-
     return CategoryService(db)
 
+async def get_cart_service(
+    db: AsyncSession = Depends(get_db),
+) -> CartService:
+    return CartService(db)
 
-def get_product_service(
-    db: Session = Depends(get_db),
-) -> ProductService:
-    """
-    Dependency that provides a ProductService.
-    """
+async def get_order_service(
+    db: AsyncSession = Depends(get_db),
+) -> OrderService:
+    return OrderService(db)
 
-    return ProductService(db)
+async def get_address_service(
+    db: AsyncSession = Depends(get_db),
+) -> AddressService:
+    return AddressService(db)
+
+async def get_phone_service(
+    db: AsyncSession = Depends(get_db),
+) -> PhoneService:
+    return PhoneService(db)
+
+async def get_wishlist_service(
+    db: AsyncSession = Depends(get_db),
+) -> WishlistService:
+    return WishlistService(db)
+
+async def get_review_service(
+    db: AsyncSession = Depends(get_db),
+) -> ReviewService:
+    return ReviewService(db)
+
+async def get_security_service(
+    db: AsyncSession = Depends(get_db),
+) -> SecurityService:
+    return SecurityService(db)

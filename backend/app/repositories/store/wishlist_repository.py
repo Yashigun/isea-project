@@ -2,131 +2,63 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import (
-    select,
-)
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-from sqlalchemy.orm import (
-    Session,
-    selectinload,
-)
-
-from app.models.store.wishlist_item import (
-    WishlistItem,
-)
-
-from app.repositories.base import (
-    BaseRepository,
-)
+from app.models.store.wishlist_item import WishlistItem
+from app.repositories.base import BaseRepository
 
 
-class WishlistRepository(
-    BaseRepository[WishlistItem],
-):
+class WishlistRepository(BaseRepository[WishlistItem]):
     """
-    Repository responsible for customer
-    wishlist database operations.
+    Repository responsible for customer wishlist database operations.
     """
 
-    def __init__(
-        self,
-        db: Session,
-    ) -> None:
-
+    def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
+
+    def _get_model(self) -> type[WishlistItem]:
+        return WishlistItem
 
     # ---------------------------------------------------------
     # Read
     # ---------------------------------------------------------
 
-    def get_by_id(
-        self,
-        wishlist_item_id: UUID,
-    ) -> WishlistItem | None:
+    async def get_by_id(self, wishlist_item_id: UUID) -> WishlistItem | None:
+        stmt = select(WishlistItem).where(WishlistItem.id == wishlist_item_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        statement = (
+    async def get_customer_wishlist(self, customer_id: UUID) -> list[WishlistItem]:
+        stmt = (
             select(WishlistItem)
-            .where(
-                WishlistItem.id == wishlist_item_id,
-            )
+            .options(selectinload(WishlistItem.product))
+            .where(WishlistItem.customer_id == customer_id)
+            .order_by(WishlistItem.created_at.desc())
         )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
-        return self.db.scalar(statement)
-
-    def get_customer_wishlist(
-        self,
-        customer_id: UUID,
-    ) -> list[WishlistItem]:
-
-        statement = (
+    async def get_item(self, customer_id: UUID, product_id: UUID) -> WishlistItem | None:
+        stmt = (
             select(WishlistItem)
-            .options(
-                selectinload(
-                    WishlistItem.product,
-                )
-            )
-            .where(
-                WishlistItem.customer_id == customer_id,
-            )
-            .order_by(
-                WishlistItem.created_at.desc(),
-            )
+            .where(WishlistItem.customer_id == customer_id)
+            .where(WishlistItem.product_id == product_id)
         )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        return list(
-            self.db.scalars(statement)
-        )
-
-    def get_item(
-        self,
-        customer_id: UUID,
-        product_id: UUID,
-    ) -> WishlistItem | None:
-
-        statement = (
-            select(WishlistItem)
-            .where(
-                WishlistItem.customer_id == customer_id,
-            )
-            .where(
-                WishlistItem.product_id == product_id,
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def exists(
-        self,
-        customer_id: UUID,
-        product_id: UUID,
-    ) -> bool:
-
-        statement = (
+    async def exists(self, customer_id: UUID, product_id: UUID) -> bool:
+        stmt = (
             select(WishlistItem.id)
-            .where(
-                WishlistItem.customer_id == customer_id,
-            )
-            .where(
-                WishlistItem.product_id == product_id,
-            )
+            .where(WishlistItem.customer_id == customer_id)
+            .where(WishlistItem.product_id == product_id)
         )
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none() is not None
 
-        return self.db.scalar(statement) is not None
-
-    def count_customer_items(
-        self,
-        customer_id: UUID,
-    ) -> int:
-
-        statement = (
-            select(WishlistItem.id)
-            .where(
-                WishlistItem.customer_id == customer_id,
-            )
-        )
-
-        return len(
-            list(
-                self.db.scalars(statement)
-            )
-        )
+    async def count_customer_items(self, customer_id: UUID) -> int:
+        stmt = select(WishlistItem.id).where(WishlistItem.customer_id == customer_id)
+        result = await self.db.execute(stmt)
+        return len(result.scalars().all())

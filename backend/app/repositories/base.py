@@ -1,112 +1,80 @@
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Type, Optional, List, Any
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update, delete
 
+from app.db.base import Base
 
-ModelType = TypeVar("ModelType")
+ModelType = TypeVar("ModelType", bound=Base)
 
 
 class BaseRepository(Generic[ModelType]):
     """
-    Base repository providing common database
-    operations for all repositories.
+    Base repository providing common async database operations.
     """
 
-    def __init__(
-        self,
-        db: Session,
-    ) -> None:
-
+    def __init__(self, db: AsyncSession) -> None:
         self.db = db
+        self.model: Type[ModelType] = self._get_model()
+
+    def _get_model(self) -> Type[ModelType]:
+        raise NotImplementedError("Subclasses must specify their model.")
 
     # ---------------------------------------------------------
     # Create
     # ---------------------------------------------------------
 
-    def create(
-        self,
-        instance: ModelType,
-    ) -> ModelType:
-        """
-        Add a model instance to the current
-        SQLAlchemy session.
-        """
-
+    async def create(self, instance: ModelType) -> ModelType:
         self.db.add(instance)
-
+        await self.db.flush()
         return instance
 
     # ---------------------------------------------------------
     # Persistence
     # ---------------------------------------------------------
 
-    def flush(
-        self,
-    ) -> None:
-        """
-        Flush pending changes to the database
-        without committing.
-        """
+    async def flush(self) -> None:
+        await self.db.flush()
 
-        self.db.flush()
+    async def refresh(self, instance: ModelType) -> None:
+        await self.db.refresh(instance)
 
-    def refresh(
-        self,
-        instance: ModelType,
-    ) -> None:
-        """
-        Refresh an instance from the database.
-        """
-
-        self.db.refresh(instance)
-
-    def save(
-        self,
-        instance: ModelType,
-    ) -> ModelType:
-        """
-        Flush pending changes and refresh
-        the instance.
-
-        Does NOT commit the transaction.
-        """
-
-        self.flush()
-
-        self.refresh(instance)
-
+    async def save(self, instance: ModelType) -> ModelType:
+        await self.flush()
+        await self.refresh(instance)
         return instance
 
-    def commit(
-        self,
-    ) -> None:
-        """
-        Commit the current transaction.
-        """
+    async def commit(self) -> None:
+        await self.db.commit()
 
-        self.db.commit()
-
-    def rollback(
-        self,
-    ) -> None:
-        """
-        Roll back the current transaction.
-        """
-
-        self.db.rollback()
+    async def rollback(self) -> None:
+        await self.db.rollback()
 
     # ---------------------------------------------------------
     # Delete
     # ---------------------------------------------------------
 
-    def remove(
-        self,
-        instance: ModelType,
-    ) -> None:
-        """
-        Mark an instance for deletion.
-        """
+    async def remove(self, instance: ModelType) -> None:
+        await self.db.delete(instance)
+        await self.flush()
 
-        self.db.delete(instance)
+    # ---------------------------------------------------------
+    # Read
+    # ---------------------------------------------------------
+
+    async def get_by_id(self, id: Any) -> Optional[ModelType]:
+        stmt = select(self.model).where(self.model.id == id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_by_public_id(self, public_id: str) -> Optional[ModelType]:
+        stmt = select(self.model).where(self.model.public_id == public_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def list_all(self, **filters) -> List[ModelType]:
+        stmt = select(self.model).filter_by(**filters)
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())

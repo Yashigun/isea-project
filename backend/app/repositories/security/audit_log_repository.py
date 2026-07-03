@@ -3,183 +3,83 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import (
-    func,
-    select,
-)
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from sqlalchemy.orm import (
-    Session,
-)
-
-from app.models.security.audit_log import AuditLog
-from app.models.security.audit_log import AuditAction
-
+from app.models.security.audit_log import AuditLog, AuditAction
 from app.repositories.base import BaseRepository
 
 
-class AuditLogRepository(
-    BaseRepository[AuditLog],
-):
+class AuditLogRepository(BaseRepository[AuditLog]):
     """
-    Repository responsible for audit log
-    database operations.
+    Repository responsible for audit log database operations.
     """
 
-    def __init__(
-        self,
-        db: Session,
-    ) -> None:
-
+    def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
+
+    def _get_model(self) -> type[AuditLog]:
+        return AuditLog
 
     # ---------------------------------------------------------
     # Read
     # ---------------------------------------------------------
 
-    def get_by_id(
-        self,
-        audit_log_id: UUID,
-    ) -> AuditLog | None:
+    async def get_by_id(self, audit_log_id: UUID) -> AuditLog | None:
+        stmt = select(AuditLog).where(AuditLog.id == audit_log_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        statement = (
+    async def get_by_public_id(self, public_id: str) -> AuditLog | None:
+        stmt = select(AuditLog).where(AuditLog.public_id == public_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_customer_logs(self, customer_id: UUID, limit: int = 100) -> list[AuditLog]:
+        stmt = (
             select(AuditLog)
-            .where(
-                AuditLog.id == audit_log_id,
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def get_by_public_id(
-        self,
-        public_id: str,
-    ) -> AuditLog | None:
-
-        statement = (
-            select(AuditLog)
-            .where(
-                AuditLog.public_id == public_id,
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def get_customer_logs(
-        self,
-        customer_id: UUID,
-        limit: int = 100,
-    ) -> list[AuditLog]:
-
-        statement = (
-            select(AuditLog)
-            .where(
-                AuditLog.customer_id == customer_id,
-            )
-            .order_by(
-                AuditLog.created_at.desc(),
-            )
+            .where(AuditLog.customer_id == customer_id)
+            .order_by(AuditLog.created_at.desc())
             .limit(limit)
         )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
-        return list(
-            self.db.scalars(statement)
-        )
-
-    def get_by_action(
-        self,
-        action: AuditAction,
-        limit: int = 100,
-    ) -> list[AuditLog]:
-
-        statement = (
+    async def get_by_action(self, action: AuditAction, limit: int = 100) -> list[AuditLog]:
+        stmt = (
             select(AuditLog)
-            .where(
-                AuditLog.action == action,
-            )
-            .order_by(
-                AuditLog.created_at.desc(),
-            )
+            .where(AuditLog.action == action)
+            .order_by(AuditLog.created_at.desc())
             .limit(limit)
         )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
-        return list(
-            self.db.scalars(statement)
-        )
-
-    def get_between(
-        self,
-        start_time: datetime,
-        end_time: datetime,
-    ) -> list[AuditLog]:
-
-        statement = (
+    async def get_between(self, start_time: datetime, end_time: datetime) -> list[AuditLog]:
+        stmt = (
             select(AuditLog)
-            .where(
-                AuditLog.created_at >= start_time,
-            )
-            .where(
-                AuditLog.created_at <= end_time,
-            )
-            .order_by(
-                AuditLog.created_at.desc(),
-            )
+            .where(AuditLog.created_at >= start_time)
+            .where(AuditLog.created_at <= end_time)
+            .order_by(AuditLog.created_at.desc())
         )
-
-        return list(
-            self.db.scalars(statement)
-        )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
     # ---------------------------------------------------------
     # Statistics
     # ---------------------------------------------------------
 
-    def count_logs(
-        self,
-    ) -> int:
+    async def count_logs(self) -> int:
+        stmt = select(func.count(AuditLog.id))
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0
 
-        statement = (
-            select(
-                func.count(
-                    AuditLog.id,
-                )
-            )
-        )
+    async def count_customer_logs(self, customer_id: UUID) -> int:
+        stmt = select(func.count(AuditLog.id)).where(AuditLog.customer_id == customer_id)
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0
 
-        return self.db.scalar(statement) or 0
-
-    def count_customer_logs(
-        self,
-        customer_id: UUID,
-    ) -> int:
-
-        statement = (
-            select(
-                func.count(
-                    AuditLog.id,
-                )
-            )
-            .where(
-                AuditLog.customer_id == customer_id,
-            )
-        )
-
-        return self.db.scalar(statement) or 0
-
-    def count_action(
-        self,
-        action: AuditAction,
-    ) -> int:
-
-        statement = (
-            select(
-                func.count(
-                    AuditLog.id,
-                )
-            )
-            .where(
-                AuditLog.action == action,
-            )
-        )
-
-        return self.db.scalar(statement) or 0
+    async def count_action(self, action: AuditAction) -> int:
+        stmt = select(func.count(AuditLog.id)).where(AuditLog.action == action)
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0

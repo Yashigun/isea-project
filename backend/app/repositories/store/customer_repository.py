@@ -4,137 +4,75 @@ from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.store.customer import Customer
 from app.repositories.base import BaseRepository
 
 
-class CustomerRepository(
-    BaseRepository[Customer],
-):
+class CustomerRepository(BaseRepository[Customer]):
     """
-    Repository responsible only for
-    customer database access.
+    Repository responsible only for customer database access.
     """
 
-    def __init__(
-        self,
-        db: Session,
-    ) -> None:
-
+    def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
+
+    def _get_model(self) -> type[Customer]:
+        return Customer
 
     # ---------------------------------------------------------
     # Create
     # ---------------------------------------------------------
 
-    def create(
-        self,
-        customer: Customer,
-    ) -> Customer:
-        """
-        Add a customer to the current transaction.
-        """
-
-        return self.create(customer)
+    async def create(self, customer: Customer) -> Customer:
+        self.db.add(customer)
+        await self.db.flush()
+        return customer
 
     # ---------------------------------------------------------
     # Read
     # ---------------------------------------------------------
 
-    def get_by_id(
-        self,
-        customer_id: UUID,
-    ) -> Customer | None:
+    async def get_by_id(self, customer_id: UUID) -> Customer | None:
+        stmt = select(Customer).where(Customer.id == customer_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        statement = (
-            select(Customer)
-            .where(
-                Customer.id == customer_id,
-            )
-        )
+    async def get_by_public_id(self, public_id: str) -> Customer | None:
+        stmt = select(Customer).where(Customer.public_id == public_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-        return self.db.scalar(statement)
+    async def get_by_email(self, email: str) -> Customer | None:
+        stmt = select(Customer).where(Customer.email == email)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
 
-    def get_by_public_id(
-        self,
-        public_id: str,
-    ) -> Customer | None:
-
-        statement = (
-            select(Customer)
-            .where(
-                Customer.public_id == public_id,
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def get_by_email(
-        self,
-        email: str,
-    ) -> Customer | None:
-
-        statement = (
-            select(Customer)
-            .where(
-                Customer.email == email,
-            )
-        )
-
-        return self.db.scalar(statement)
-
-    def exists_by_email(
-        self,
-        email: str,
-    ) -> bool:
-
-        statement = (
-            select(Customer.id)
-            .where(
-                Customer.email == email,
-            )
-        )
-
-        return self.db.scalar(statement) is not None
+    async def exists_by_email(self, email: str) -> bool:
+        stmt = select(Customer.id).where(Customer.email == email)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none() is not None
 
     # ---------------------------------------------------------
     # Persistence
     # ---------------------------------------------------------
 
-    def save(
-        self,
-        customer: Customer,
-    ) -> Customer:
-        """
-        Flush modified customer state
-        without committing.
-        """
-
-        self.flush()
-
-        self.refresh(customer)
-
+    async def save(self, customer: Customer) -> Customer:
+        await self.db.flush()
+        await self.db.refresh(customer)
         return customer
 
     # ---------------------------------------------------------
     # Delete
     # ---------------------------------------------------------
 
-    def remove(
-        self,
-        customer: Customer,
-    ) -> None:
+    async def remove(self, customer: Customer) -> None:
+        await self.db.delete(customer)
+        await self.db.flush()
 
-        self.delete(customer)
-        
-    def update_last_login(
-        self,
-        customer: Customer,
-        logged_in_at: datetime,
-    ) -> Customer:
-
+    async def update_last_login(self, customer: Customer, logged_in_at: datetime) -> Customer:
         customer.last_login_at = logged_in_at
-
-        return self.save(customer)
+        await self.db.flush()
+        await self.db.refresh(customer)
+        return customer

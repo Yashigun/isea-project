@@ -1,11 +1,13 @@
 from datetime import datetime
 from enum import Enum
 
-from sqlalchemy import DateTime, Enum as SQLEnum, Integer, String
+from sqlalchemy import DateTime, Enum as SQLEnum, Integer, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
 from app.models.base import TimestampMixin, UUIDMixin
+
+from typing import Optional
 
 
 class AccountStatus(str, Enum):
@@ -20,6 +22,9 @@ account_status_enum = SQLEnum(
     name="account_status",
     values_callable=lambda enum: [member.value for member in enum],
 )
+class AuthProvider(str, Enum):
+    EMAIL = "email"
+    GOOGLE = "google"
 
 
 class Customer(Base, UUIDMixin, TimestampMixin):
@@ -71,6 +76,16 @@ class Customer(Base, UUIDMixin, TimestampMixin):
     last_login_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
+    )
+    auth_provider: Mapped[AuthProvider] = mapped_column(
+        SQLEnum(AuthProvider), default=AuthProvider.EMAIL, nullable=False
+    )
+    google_id: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True, index=True
+    )
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, index=True
     )
     addresses: Mapped[list["Address"]] = relationship(
         back_populates="customer",
