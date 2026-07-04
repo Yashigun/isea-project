@@ -133,7 +133,7 @@ class CustomerResponseSchema(BaseResponseSchema):
 
     first_name: str
 
-    last_name: str
+    last_name: Optional[str] = None
 
     email: EmailStr
 
