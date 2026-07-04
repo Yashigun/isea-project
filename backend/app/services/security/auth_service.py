@@ -35,7 +35,7 @@ class AuthService:
             email=email,
             password_hash=hashed,
             first_name=first_name,
-            last_name=last_name,
+            last_name=last_name or None,
             account_status=AccountStatus.ACTIVE,
             auth_provider=AuthProvider.EMAIL,
         )

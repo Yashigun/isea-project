@@ -39,9 +39,9 @@ class Customer(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
         nullable=False
     )
 
-    last_name: Mapped[str] = mapped_column(
+    last_name: Mapped[str | None] = mapped_column(
         String(100),
-        nullable=False
+        nullable=True
     )
 
     email: Mapped[str] = mapped_column(

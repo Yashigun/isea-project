@@ -1,6 +1,7 @@
 
 import asyncio
 from logging.config import fileConfig
+
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -11,6 +12,10 @@ import os
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+print("DATABASE_URL =", DATABASE_URL)
+
+
 # Import your Base and models
 from app.db.database import Base
 #from app.db.base import Base  # Make sure Base is imported from the correct location
@@ -27,10 +32,11 @@ config.set_main_option(
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+print("URL from config =", config.get_main_option("sqlalchemy.url"))
 # Set the target metadata
 target_metadata = Base.metadata
 
-print(Base.metadata.tables.keys())
+#print(Base.metadata.tables.keys())
 
 
 # Other values from the config, defined by the needs of env.py,
@@ -52,11 +58,16 @@ def run_migrations_offline() -> None:
 
     """
     url = config.get_main_option("sqlalchemy.url")
+
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_schemas=True,
+        version_table_schema="public",
+        compare_type=True,
+        compare_server_default=True,
     )
 
     with context.begin_transaction():
@@ -65,7 +76,14 @@ def run_migrations_offline() -> None:
 
 def do_run_migrations(connection: Connection) -> None:
     """Run the actual migrations using a connection."""
-    context.configure(connection=connection, target_metadata=target_metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        include_schemas=True,
+        version_table_schema="public",
+        compare_type=True,
+        compare_server_default=True,
+    )
 
     with context.begin_transaction():
         context.run_migrations()

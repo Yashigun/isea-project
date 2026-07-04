@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+
 
 from app.api import (
     auth_router,
@@ -19,6 +22,15 @@ from app.middlewares.request_log import RequestLogMiddleware
 app = FastAPI(
     title="Personal Store API",
     version="1.0.0",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.add_middleware(SecurityEventMiddleware)

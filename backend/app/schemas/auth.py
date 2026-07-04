@@ -14,7 +14,8 @@ from pydantic import (
 
 from app.validators.customer import (
     normalize_email,
-    validate_name,
+    validate_first_name,
+    validate_last_name,
 )
 
 from app.validators.password import (
@@ -58,7 +59,7 @@ class RegisterRequestSchema(BaseModel):
         cls,
         value: str,
     ) -> str:
-        return validate_name(value)
+        return validate_first_name(value)
 
     @field_validator("last_name")
     @classmethod
@@ -66,7 +67,7 @@ class RegisterRequestSchema(BaseModel):
         cls,
         value: str,
     ) -> str:
-        return validate_name(value)
+        return validate_last_name(value)
 
     @field_validator("email")
     @classmethod

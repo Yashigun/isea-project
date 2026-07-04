@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 from pydantic import Field
 
 from pydantic import (
@@ -16,7 +17,8 @@ from app.schemas.common import (
 
 from app.validators.customer import (
     normalize_email,
-    validate_name,
+    validate_first_name,
+    validate_last_name,
     validate_phone_number,
 )
 
@@ -32,26 +34,26 @@ class CustomerUpdateSchema(BaseRequestSchema):
         max_length=100,
     )
 
-    last_name: str | None = Field(
+    last_name: Optional[str] = Field(
         default=None,
-        min_length=2,
         max_length=100,
     )
 
-    @field_validator(
-        "first_name",
-        "last_name",
-    )
+    @field_validator( "first_name" )
     @classmethod
-    def validate_customer_name(
-        cls,
-        value: str | None,
-    ) -> str | None:
-
+    def validate_first_name( cls, value: str | None) -> str | None:
         if value is None:
             return value
 
-        return validate_name(value)
+        return validate_first_name(value)
+    
+    @field_validator( "last_name" )
+    @classmethod
+    def validate_last_name(cls, value: str | None) -> str | None:
+        if value is None or value.strip() == "":
+            return None
+
+        return validate_last_name(value)
 
 
 class CustomerEmailUpdateSchema(BaseRequestSchema):
