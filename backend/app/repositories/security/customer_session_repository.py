@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.security.customer_session import CustomerSession
@@ -12,91 +13,229 @@ from app.repositories.base import BaseRepository
 
 class CustomerSessionRepository(BaseRepository[CustomerSession]):
     """
-    Repository responsible for customer session persistence.
+    Repository responsible for customer session database operations.
     """
 
-    def __init__(self, db: AsyncSession) -> None:
+    def __init__(
+        self,
+        db: AsyncSession,
+    ) -> None:
         super().__init__(db)
 
     def _get_model(self) -> type[CustomerSession]:
         return CustomerSession
 
     # ---------------------------------------------------------
-    # Create
+    # Create / Update
     # ---------------------------------------------------------
 
-    async def create(self, session: CustomerSession) -> CustomerSession:
+    async def create(
+        self,
+        session: CustomerSession,
+    ) -> CustomerSession:
+
         self.db.add(session)
+
         await self.db.flush()
+
+        return session
+
+    async def save(
+        self,
+        session: CustomerSession,
+    ) -> CustomerSession:
+
+        await self.db.flush()
+
         return session
 
     # ---------------------------------------------------------
     # Read
     # ---------------------------------------------------------
 
-    async def get_by_public_id(self, public_id: str) -> CustomerSession | None:
-        stmt = select(CustomerSession).where(CustomerSession.public_id == public_id)
-        result = await self.db.execute(stmt)
-        return result.scalar_one_or_none()
+    async def get_by_id(
+        self,
+        session_id: UUID,
+    ) -> Optional[CustomerSession]:
 
-    async def get_by_refresh_token_hash(self, refresh_token_hash: str) -> CustomerSession | None:
-        stmt = select(CustomerSession).where(CustomerSession.refresh_token_hash == refresh_token_hash)
-        result = await self.db.execute(stmt)
-        return result.scalar_one_or_none()
-
-    async def get_active_session(self, customer_id: UUID, refresh_token_hash: str) -> CustomerSession | None:
         stmt = (
             select(CustomerSession)
-            .where(CustomerSession.customer_id == customer_id)
-            .where(CustomerSession.refresh_token_hash == refresh_token_hash)
-            .where(CustomerSession.revoked_at.is_(None))
+            .where(CustomerSession.id == session_id)
         )
+
         result = await self.db.execute(stmt)
+
         return result.scalar_one_or_none()
 
-    async def get_customer_sessions(self, customer_id: UUID) -> list[CustomerSession]:
+    async def get_by_public_id(
+        self,
+        public_id: str,
+    ) -> Optional[CustomerSession]:
+
         stmt = (
             select(CustomerSession)
-            .where(CustomerSession.customer_id == customer_id)
-            .where(CustomerSession.revoked_at.is_(None))
-            .order_by(CustomerSession.created_at.desc())
+            .where(CustomerSession.public_id == public_id)
         )
+
         result = await self.db.execute(stmt)
+
+        return result.scalar_one_or_none()
+
+    async def get_by_refresh_token(
+        self,
+        refresh_token_hash: str,
+    ) -> Optional[CustomerSession]:
+
+        stmt = (
+            select(CustomerSession)
+            .where(
+                CustomerSession.refresh_token_hash
+                == refresh_token_hash
+            )
+        )
+
+        result = await self.db.execute(stmt)
+
+        return result.scalar_one_or_none()
+
+    async def get_active_session(
+        self,
+        customer_id: UUID,
+        session_token: str,
+    ) -> Optional[CustomerSession]:
+
+        stmt = (
+            select(CustomerSession)
+            .where(
+                CustomerSession.customer_id == customer_id
+            )
+            .where(
+                CustomerSession.session_token
+                == session_token
+            )
+            .where(
+                CustomerSession.is_active.is_(True)
+            )
+        )
+
+        result = await self.db.execute(stmt)
+
+        return result.scalar_one_or_none()
+
+    async def list_customer_sessions(
+        self,
+        customer_id: UUID,
+    ) -> list[CustomerSession]:
+
+        stmt = (
+            select(CustomerSession)
+            .where(
+                CustomerSession.customer_id == customer_id
+            )
+            .order_by(
+                CustomerSession.created_at.desc()
+            )
+        )
+
+        result = await self.db.execute(stmt)
+
+        return list(result.scalars().all())
+
+    async def list_active_sessions(
+        self,
+        customer_id: UUID,
+    ) -> list[CustomerSession]:
+
+        stmt = (
+            select(CustomerSession)
+            .where(
+                CustomerSession.customer_id == customer_id
+            )
+            .where(
+                CustomerSession.is_active.is_(True)
+            )
+            .order_by(
+                CustomerSession.created_at.desc()
+            )
+        )
+
+        result = await self.db.execute(stmt)
+
         return list(result.scalars().all())
 
     # ---------------------------------------------------------
-    # Persistence
+    # Statistics
     # ---------------------------------------------------------
 
-    async def save(self, session: CustomerSession) -> CustomerSession:
-        await self.db.flush()
-        await self.db.refresh(session)
-        return session
+    async def count_active_sessions(
+        self,
+        customer_id: UUID,
+    ) -> int:
 
-    # ---------------------------------------------------------
-    # Bulk Operations
-    # ---------------------------------------------------------
-
-    async def revoke_all_sessions(self, customer_id: UUID, revoked_at: datetime) -> None:
         stmt = (
-            update(CustomerSession)
-            .where(CustomerSession.customer_id == customer_id)
-            .where(CustomerSession.revoked_at.is_(None))
-            .values(revoked_at=revoked_at)
+            select(func.count(CustomerSession.id))
+            .where(
+                CustomerSession.customer_id == customer_id
+            )
+            .where(
+                CustomerSession.is_active.is_(True)
+            )
         )
-        await self.db.execute(stmt)
-        await self.db.flush()
+
+        result = await self.db.execute(stmt)
+
+        return result.scalar() or 0
 
     # ---------------------------------------------------------
-    # Delete
+    # Session Management
     # ---------------------------------------------------------
 
-    async def remove(self, session: CustomerSession) -> None:
-        await self.db.delete(session)
+    async def deactivate(
+        self,
+        session: CustomerSession,
+    ) -> CustomerSession:
+
+        session.is_active = False
+
         await self.db.flush()
 
-    async def revoke(self, session: CustomerSession, revoked_at: datetime) -> CustomerSession:
-        session.revoked_at = revoked_at
-        await self.db.flush()
-        await self.db.refresh(session)
         return session
+
+    async def deactivate_all(
+        self,
+        customer_id: UUID,
+    ) -> None:
+
+        sessions = await self.list_active_sessions(
+            customer_id
+        )
+
+        for session in sessions:
+            session.is_active = False
+
+        await self.db.flush()
+
+    async def delete_expired(
+        self,
+        now: datetime,
+    ) -> int:
+
+        stmt = (
+            select(CustomerSession)
+            .where(
+                CustomerSession.expires_at < now
+            )
+        )
+
+        result = await self.db.execute(stmt)
+
+        sessions = result.scalars().all()
+
+        count = len(sessions)
+
+        for session in sessions:
+            await self.db.delete(session)
+
+        await self.db.flush()
+
+        return count

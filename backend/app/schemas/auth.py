@@ -37,7 +37,7 @@ class RegisterRequestSchema(BaseModel):
     )
 
     last_name: Optional[str] = Field(
-        min_length=2,
+        default=None,
         max_length=100,
     )
 
@@ -55,23 +55,29 @@ class RegisterRequestSchema(BaseModel):
 
     @field_validator("first_name")
     @classmethod
-    def validate_first_name(
+    def validate_customer_first_name(
         cls,
         value: str,
     ) -> str:
         return validate_first_name(value)
 
-
     @field_validator("last_name", mode="before")
     @classmethod
     def empty_string_to_none(cls, value):
-        if value == "":
+        if value is None:
             return None
+
+        if isinstance(value, str) and value.strip() == "":
+            return None
+
         return value
 
     @field_validator("last_name")
     @classmethod
-    def validate_last_name_field(cls, value):
+    def validate_customer_last_name(
+        cls,
+        value: Optional[str],
+    ) -> Optional[str]:
         return validate_last_name(value)
 
     @field_validator("email")
@@ -276,17 +282,11 @@ class AuthenticatedCustomerSchema(BaseModel):
     """
     Authenticated customer information.
     """
-
     public_id: str
-
     first_name: str
-
     last_name: Optional[str] = None
-
     email: EmailStr
-    
-    is_admin: bool
-
+    is_admin: bool = False
     model_config = ConfigDict(
         from_attributes=True,
     )

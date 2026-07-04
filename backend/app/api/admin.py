@@ -1,39 +1,57 @@
-from app.models.security.security_event import EventSeverity
+from __future__ import annotations
+
+from datetime import datetime, timedelta
+from typing import Optional
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.db.database import get_db
-from app.services.security.security_service import SecurityService
+from app.core.dependencies import get_current_admin
+from app.models.store.customer import Customer
+from app.models.security.security_event import EventSeverity, SecurityEventType
+from app.models.security.blocked_ip import BlockReason, BlockedIP
+from app.models.security.login_attempt import LoginAttempt
+from app.models.security.request_log import RequestLog
 from app.schemas.security import (
     SecurityEventResponse,
     BlockedIPResponse,
     BlockedIPCreateSchema,
+    RequestLogResponse,
+    LoginAttemptResponse,
+    AuditLogResponse,
 )
-from app.core.dependencies import get_current_admin
-from typing import List, Optional
+from app.services.security.security_service import SecurityService
+from app.repositories.security.request_log_repository import RequestLogRepository
+from app.repositories.security.login_attempt_repository import LoginAttemptRepository
+from app.repositories.security.audit_log_repository import AuditLogRepository
+from app.repositories.security.blocked_ip_repository import BlockedIPRepository
+from app.repositories.security.security_event_repository import SecurityEventRepository
 
 router = APIRouter(prefix="/admin/security", tags=["admin-security"], dependencies=[Depends(get_current_admin)])
 
-@router.get("/events", response_model=List[SecurityEventResponse])
-async def list_events(
-    severity: Optional[str] = None,
-    resolved: Optional[bool] = None,
+# ----------------------------------------
+# Security Events (already existing)
+# ----------------------------------------
+
+@router.get("/events", response_model=list[SecurityEventResponse])
+async def list_security_events(
+    severity: Optional[str] = Query(None),
+    resolved: Optional[bool] = Query(None),
     limit: int = Query(100, ge=1, le=500),
-    offset: int = Query(0, ge=0),
     db: AsyncSession = Depends(get_db),
 ):
     service = SecurityService(db)
-    # Convert severity string to enum if provided
-    severity_enum = None
-    if severity:
-        try:
-            severity_enum = EventSeverity(severity.lower())
-        except ValueError:
-            pass
-    events = await service.list_events(severity_enum, resolved, limit, offset)
+    events = await service.list_events(severity, resolved, limit)
     return events
 
 @router.post("/events/{public_id}/resolve")
-async def resolve_event(public_id: str, db: AsyncSession = Depends(get_db)):
+async def resolve_security_event(
+    public_id: str,
+    db: AsyncSession = Depends(get_db),
+):
     service = SecurityService(db)
     try:
         event = await service.resolve_event(public_id)
@@ -41,19 +59,134 @@ async def resolve_event(public_id: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail=str(e))
     return {"message": "Event resolved"}
 
-@router.get("/dashboard/stats")
-async def get_dashboard_stats(db: AsyncSession = Depends(get_db)):
-    service = SecurityService(db)
-    stats = await service.get_dashboard_stats()
-    return stats
+# ----------------------------------------
+# Request Logs
+# ----------------------------------------
 
-@router.get("/blocked-ips", response_model=List[BlockedIPResponse])
-async def list_blocked_ips(db: AsyncSession = Depends(get_db)):
-    service = SecurityService(db)
-    blocks = await service.list_active_blocks()
-    return blocks
+@router.get("/requests", response_model=dict)
+async def get_request_logs(
+    method: Optional[str] = Query(None),
+    status_code: Optional[int] = Query(None),
+    ip: Optional[str] = Query(None),
+    start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    repo = RequestLogRepository(db)
+    logs, total = await repo.filter_logs(
+        method=method,
+        status_code=status_code,
+        ip=ip,
+        start_date=start_date,
+        end_date=end_date,
+        limit=limit,
+        offset=offset
+    )
+    return {
+        "items": logs,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
 
-@router.post("/blocked-ips", response_model=BlockedIPResponse)
+# ----------------------------------------
+# Login Attempts
+# ----------------------------------------
+
+@router.get("/login-attempts", response_model=dict)
+async def get_login_attempts(
+    email: Optional[str] = Query(None),
+    ip: Optional[str] = Query(None),
+    successful: Optional[bool] = Query(None),
+    start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    repo = LoginAttemptRepository(db)
+    attempts, total = await repo.filter_attempts(
+        email=email,
+        ip=ip,
+        successful=successful,
+        start_date=start_date,
+        end_date=end_date,
+        limit=limit,
+        offset=offset
+    )
+    return {
+        "items": attempts,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
+# ----------------------------------------
+# Audit Logs
+# ----------------------------------------
+
+@router.get("/audit-logs", response_model=dict)
+async def get_audit_logs(
+    action: Optional[str] = Query(None),
+    entity_type: Optional[str] = Query(None),
+    customer_id: Optional[UUID] = Query(None),
+    start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    repo = AuditLogRepository(db)
+    logs, total = await repo.filter_logs(
+        action=action,
+        entity_type=entity_type,
+        customer_id=customer_id,
+        start_date=start_date,
+        end_date=end_date,
+        limit=limit,
+        offset=offset
+    )
+    return {
+        "items": logs,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
+# ----------------------------------------
+# Blocked IPs (list, block, unblock)
+# ----------------------------------------
+
+@router.get("/blocked-ips", response_model=dict)
+async def get_blocked_ips(
+    active_only: bool = Query(False),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    repo = BlockedIPRepository(db)
+    if active_only:
+        items = await repo.list_active_blocks(datetime.utcnow())
+        total = len(items)
+        # Since list_active_blocks returns all, we need to paginate manually
+        items = items[offset:offset+limit]
+    else:
+        # We need a method to get all with pagination; we'll add a simple query
+        stmt = select(BlockedIP).order_by(BlockedIP.created_at.desc()).offset(offset).limit(limit)
+        result = await db.execute(stmt)
+        items = result.scalars().all()
+        total_stmt = select(func.count(BlockedIP.id))
+        total = await db.scalar(total_stmt) or 0
+    return {
+        "items": items,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
+@router.post("/blocked-ips")
 async def block_ip(
     data: BlockedIPCreateSchema,
     db: AsyncSession = Depends(get_db),
@@ -73,10 +206,60 @@ async def block_ip(
     return blocked
 
 @router.delete("/blocked-ips/{public_id}")
-async def unblock_ip(public_id: str, db: AsyncSession = Depends(get_db)):
+async def unblock_ip(
+    public_id: str,
+    db: AsyncSession = Depends(get_db),
+):
     service = SecurityService(db)
     try:
         await service.unblock_ip(public_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     return {"message": "IP unblocked"}
+
+# ----------------------------------------
+# Statistics / Dashboard
+# ----------------------------------------
+
+@router.get("/dashboard/stats")
+async def get_dashboard_stats(
+    db: AsyncSession = Depends(get_db),
+):
+    service = SecurityService(db)
+    return await service.get_dashboard_stats()
+
+@router.get("/stats/requests-by-ip")
+async def get_requests_by_ip(
+    since: Optional[datetime] = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    if not since:
+        since = datetime.utcnow() - timedelta(days=1)
+    repo = RequestLogRepository(db)
+    stmt = (
+        select(RequestLog.ip_address, func.count(RequestLog.id))
+        .where(RequestLog.created_at >= since)
+        .group_by(RequestLog.ip_address)
+        .order_by(func.count(RequestLog.id).desc())
+        .limit(20)
+    )
+    result = await db.execute(stmt)
+    return [{"ip": ip, "count": count} for ip, count in result.all()]
+
+@router.get("/stats/failed-logins-by-ip")
+async def get_failed_logins_by_ip(
+    since: Optional[datetime] = Query(None),
+    db: AsyncSession = Depends(get_db),
+):
+    if not since:
+        since = datetime.utcnow() - timedelta(days=1)
+    stmt = (
+        select(LoginAttempt.ip_address, func.count(LoginAttempt.id))
+        .where(LoginAttempt.successful.is_(False))
+        .where(LoginAttempt.created_at >= since)
+        .group_by(LoginAttempt.ip_address)
+        .order_by(func.count(LoginAttempt.id).desc())
+        .limit(20)
+    )
+    result = await db.execute(stmt)
+    return [{"ip": ip, "count": count} for ip, count in result.all()]

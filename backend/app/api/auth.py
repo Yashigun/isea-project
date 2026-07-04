@@ -46,8 +46,8 @@ async def register(
         first_name=customer.first_name,
         last_name=customer.last_name,
         email=customer.email,
+        is_admin=customer.is_admin,
     )
-
 
 @router.post("/login")
 async def login(
@@ -83,6 +83,7 @@ async def login(
             "first_name": customer.first_name,
             "last_name": customer.last_name,
             "email": customer.email,
+            "is_admin": customer.is_admin,
         },
     }
 

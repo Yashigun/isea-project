@@ -1,47 +1,99 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from uuid import UUID
-from app.models.security.request_log import RequestLog
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import func, select
 
-from app.repositories.security.security_event_repository import SecurityEventRepository
-from app.repositories.security.request_log_repository import RequestLogRepository
-from app.repositories.security.blocked_ip_repository import BlockedIPRepository
-from app.repositories.security.login_attempt_repository import LoginAttemptRepository
-from app.models.security.security_event import SecurityEvent, SecurityEventType, EventSeverity
-from app.models.security.blocked_ip import BlockedIP, BlockReason
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.security.blocked_ip import (
+    BlockReason,
+    BlockedIP,
+)
+
+from app.models.security.request_log import RequestLog
+
+from app.models.security.security_event import (
+    EventSeverity,
+    SecurityEvent,
+    SecurityEventType,
+)
+
+from app.repositories.security.blocked_ip_repository import (
+    BlockedIPRepository,
+)
+
+from app.repositories.security.login_attempt_repository import (
+    LoginAttemptRepository,
+)
+
+from app.repositories.security.request_log_repository import (
+    RequestLogRepository,
+)
+
+from app.repositories.security.security_event_repository import (
+    SecurityEventRepository,
+)
 
 
 class SecurityService:
-    def __init__(self, db: AsyncSession):
+
+    def __init__(
+        self,
+        db: AsyncSession,
+    ) -> None:
+
         self.db = db
+
         self.event_repo = SecurityEventRepository(db)
+
         self.request_log_repo = RequestLogRepository(db)
-        self.blocked_ip_repo = BlockedIPRepository(db)
+
         self.login_attempt_repo = LoginAttemptRepository(db)
 
-    # ---- Events ----
+        self.blocked_ip_repo = BlockedIPRepository(db)
+
+    # ---------------------------------------------------------
+    # Security Events
+    # ---------------------------------------------------------
+
     async def list_events(
         self,
         severity: Optional[EventSeverity] = None,
         resolved: Optional[bool] = None,
         limit: int = 100,
         offset: int = 0,
-    ) -> List[SecurityEvent]:
-        # For simplicity, we fetch recent and filter
-        # In production, add proper filtering to the repository
-        events = await self.event_repo.get_recent(limit + offset)
-        if severity:
-            events = [e for e in events if e.severity == severity]
-        if resolved is not None:
-            events = [e for e in events if e.resolved == resolved]
-        return events[offset:offset+limit]
+    ) -> list[SecurityEvent]:
 
-    async def get_event_by_public_id(self, public_id: str) -> Optional[SecurityEvent]:
-        return await self.event_repo.get_by_public_id(public_id)
+        events = await self.event_repo.get_recent(
+            limit + offset,
+        )
+
+        if severity is not None:
+            events = [
+                event
+                for event in events
+                if event.severity == severity
+            ]
+
+        if resolved is not None:
+            events = [
+                event
+                for event in events
+                if event.resolved == resolved
+            ]
+
+        return events[offset : offset + limit]
+
+    async def get_event_by_public_id(
+        self,
+        public_id: str,
+    ) -> Optional[SecurityEvent]:
+
+        return await self.event_repo.get_by_public_id(
+            public_id,
+        )
 
     async def create_event(
         self,
@@ -55,6 +107,7 @@ class SecurityService:
         request_id: Optional[str] = None,
         evidence: Optional[dict] = None,
     ) -> SecurityEvent:
+
         event = SecurityEvent(
             request_id=request_id,
             customer_id=customer_id,
@@ -67,20 +120,39 @@ class SecurityService:
             evidence=evidence,
             resolved=False,
         )
+
         await self.event_repo.create(event)
+
         await self.db.commit()
+
         return event
 
-    async def resolve_event(self, public_id: str) -> SecurityEvent:
-        event = await self.event_repo.get_by_public_id(public_id)
-        if not event:
-            raise ValueError("Event not found")
+    async def resolve_event(
+        self,
+        public_id: str,
+    ) -> SecurityEvent:
+
+        event = await self.event_repo.get_by_public_id(
+            public_id,
+        )
+
+        if event is None:
+            raise ValueError(
+                "Security event not found."
+            )
+
         event.resolved = True
+
         await self.event_repo.save(event)
+
         await self.db.commit()
+
         return event
 
-    # ---- Blocked IPs ----
+    # ---------------------------------------------------------
+    # Blocked IPs
+    # ---------------------------------------------------------
+
     async def block_ip(
         self,
         ip: str,
@@ -90,104 +162,200 @@ class SecurityService:
         expires_in_minutes: Optional[int] = None,
         permanently: bool = False,
     ) -> BlockedIP:
-        existing = await self.blocked_ip_repo.get_by_ip_address(ip)
+
+        existing = (
+            await self.blocked_ip_repo.get_by_ip_address(
+                ip
+            )
+        )
+
         if existing and existing.is_active:
-            raise ValueError("IP already blocked")
-        if existing and not existing.is_active:
-            # Reactivate
+            raise ValueError(
+                "IP is already blocked."
+            )
+
+        if existing:
+
             existing.is_active = True
             existing.reason = reason
             existing.blocked_by = blocked_by
             existing.block_note = note
+
             if permanently:
-                existing.blocked_until = None
+
                 existing.permanently_blocked = True
+                existing.blocked_until = None
+
             else:
+
                 existing.permanently_blocked = False
-                existing.blocked_until = datetime.utcnow() + timedelta(minutes=expires_in_minutes or 60)
-            await self.blocked_ip_repo.save(existing)
+
+                existing.blocked_until = (
+                    datetime.utcnow()
+                    + timedelta(
+                        minutes=expires_in_minutes or 60
+                    )
+                )
+
+            await self.blocked_ip_repo.save(
+                existing,
+            )
+
             await self.db.commit()
+
             return existing
-        # New block
+
         blocked = BlockedIP(
             ip_address=ip,
             reason=reason,
             blocked_by=blocked_by,
             block_note=note,
-            blocked_until=None if permanently else datetime.utcnow() + timedelta(minutes=expires_in_minutes or 60),
             permanently_blocked=permanently,
+            blocked_until=(
+                None
+                if permanently
+                else datetime.utcnow()
+                + timedelta(
+                    minutes=expires_in_minutes or 60
+                )
+            ),
             is_active=True,
         )
-        await self.blocked_ip_repo.create(blocked)
+
+        await self.blocked_ip_repo.create(
+            blocked,
+        )
+
         await self.db.commit()
+
         return blocked
+    
+    async def unblock_ip(
+        self,
+        public_id: str,
+    ) -> None:
 
-    async def unblock_ip(self, public_id: str) -> None:
-        blocked = await self.blocked_ip_repo.get_by_public_id(public_id)
-        if not blocked:
-            raise ValueError("Blocked IP not found")
+        blocked = (
+            await self.blocked_ip_repo.get_by_public_id(
+                public_id
+            )
+        )
+
+        if blocked is None:
+            raise ValueError(
+                "Blocked IP not found."
+            )
+
         blocked.is_active = False
-        await self.blocked_ip_repo.save(blocked)
+
+        await self.blocked_ip_repo.save(
+            blocked,
+        )
+
         await self.db.commit()
 
-    async def list_active_blocks(self) -> List[BlockedIP]:
-        now = datetime.utcnow()
-        return await self.blocked_ip_repo.list_active_blocks(now)
+    async def list_active_blocks(
+        self,
+    ) -> list[BlockedIP]:
 
-    # ---- Dashboard Stats ----
-    async def get_dashboard_stats(self) -> Dict[str, Any]:
+        return (
+            await self.blocked_ip_repo.list_active_blocks(
+                datetime.utcnow()
+            )
+        )
+
+    # ---------------------------------------------------------
+    # Dashboard
+    # ---------------------------------------------------------
+
+    async def get_dashboard_stats(
+        self,
+    ) -> dict:
+
         now = datetime.utcnow()
+
         last_hour = now - timedelta(hours=1)
+
         last_24h = now - timedelta(days=1)
 
-        # Count requests (need custom method in RequestLogRepository to count all)
-        total_requests = await self.request_log_repo.count_requests()
-        requests_last_hour = await self._count_requests_since(last_hour)
+        total_requests = (
+            await self.request_log_repo.count_requests()
+        )
 
-        # Security events
-        total_events = await self.event_repo.count_events()
-        critical_events = await self.event_repo.count_by_severity(EventSeverity.CRITICAL)
-        high_events = await self.event_repo.count_by_severity(EventSeverity.HIGH)
+        requests_last_hour = (
+            await self.request_log_repo.count_requests_since(
+                last_hour
+            )
+        )
 
-        # Failed logins
-        failed_logins_last_24h = await self.login_attempt_repo.count_recent_failures("", last_24h)  # need to fix to count all
+        total_security_events = (
+            await self.event_repo.count_events()
+        )
 
-        # Blocked IPs
-        active_blocks = await self.blocked_ip_repo.count_active_blocks(now)
+        critical_events = (
+            await self.event_repo.count_by_severity(
+                EventSeverity.CRITICAL
+            )
+        )
 
-        # Top IPs by requests (we need to add method to RequestLogRepository)
-        top_ips = await self._get_top_ips(limit=10)
+        high_events = (
+            await self.event_repo.count_by_severity(
+                EventSeverity.HIGH
+            )
+        )
+
+        failed_logins_last_24h = (
+            await self.login_attempt_repo.count_recent_failures(
+                last_24h
+            )
+        )
+
+        blocked_ips = (
+            await self.blocked_ip_repo.count_active_blocks(
+                now
+            )
+        )
+
+        top_ips = await self._get_top_ips()
 
         return {
             "total_requests": total_requests,
             "requests_last_hour": requests_last_hour,
-            "total_security_events": total_events,
+            "total_security_events": total_security_events,
             "critical_events": critical_events,
             "high_events": high_events,
             "failed_logins_last_24h": failed_logins_last_24h,
-            "active_blocked_ips": active_blocks,
+            "blocked_ips": blocked_ips,
             "top_ips": top_ips,
         }
 
-    # ---- Helper methods ----
-    async def _count_requests_since(self, since: datetime) -> int:
-        # We need to add this to RequestLogRepository
-        stmt = select(func.count(RequestLog.id)).where(RequestLog.created_at >= since)
-        result = await self.db.execute(stmt)
-        return result.scalar() or 0
+    # ---------------------------------------------------------
+    # Helpers
+    # ---------------------------------------------------------
 
-    async def _get_top_ips(self, limit: int = 10) -> List[Dict[str, Any]]:
-        # Group by ip_address and count
-        stmt = (
-            select(RequestLog.ip_address, func.count(RequestLog.id))
-            .group_by(RequestLog.ip_address)
-            .order_by(func.count(RequestLog.id).desc())
-            .limit(limit)
+    async def _get_top_ips(
+        self,
+        limit: int = 10,
+    ) -> list[dict]:
+
+        rows = (
+            await self.request_log_repo.get_top_ips(
+                limit
+            )
         )
-        result = await self.db.execute(stmt)
-        rows = result.all()
-        return [{"ip": row[0], "count": row[1]} for row in rows]
-    
+
+        return [
+            {
+                "ip": ip,
+                "count": count,
+            }
+            for ip, count in rows
+        ]
+
+
+# ---------------------------------------------------------
+# Utility
+# ---------------------------------------------------------
 
 async def create_security_event_async(
     event_type: str,
@@ -195,24 +363,22 @@ async def create_security_event_async(
     title: str,
     description: str,
     ip: str,
-    request_id: Optional[str] = None,
-    evidence: Optional[dict] = None,
+    request_id: str | None = None,
+    evidence: dict | None = None,
 ) -> None:
+
     from app.db.database import AsyncSessionLocal
-    from app.models.security.security_event import SecurityEventType, EventSeverity
-    from app.repositories.security.security_event_repository import SecurityEventRepository
 
     async with AsyncSessionLocal() as db:
-        repo = SecurityEventRepository(db)
-        event = SecurityEvent(
-            request_id=request_id,
+
+        service = SecurityService(db)
+
+        await service.create_event(
             event_type=SecurityEventType(event_type),
             severity=EventSeverity(severity),
             title=title,
             description=description,
-            ip_address=ip,
+            ip=ip,
+            request_id=request_id,
             evidence=evidence,
-            resolved=False,
         )
-        await repo.create(event)
-        await db.commit()
