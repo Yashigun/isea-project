@@ -6,11 +6,7 @@ import ProductGallery from "@/components/product/ProductGallery";
 import ProductInfo from "@/components/product/ProductInfo";
 import RelatedProducts from "@/components/product/RelatedProducts";
 
-import {
-    getProductBySlug,
-    getProductsByCategory,
-} from "@/services/product";
-import { products } from "@/data/products";
+import { productService } from "@/services/product";
 
 interface ProductPageProps {
   params: Promise<{
@@ -23,9 +19,9 @@ export default async function ProductPage({
 }: ProductPageProps) {
   const { slug } = await params;
 
-  const product =
-    await getProductBySlug(slug);
-    if(!product) {
+  const product = await productService.getBySlug(slug);
+
+  if (!product) {
     return (
       <Container>
         <p>Product not found.</p>
@@ -33,23 +29,14 @@ export default async function ProductPage({
     );
   }
 
-  const relatedProducts =
-    (
-        await getProductsByCategory(
-            product.category.slug
-        )
-    )
-    .filter(
-        item=>item.id!==product.id
-    )
-    .slice(0,4);
+  const relatedProducts = await productService.getRelated(
+    product.public_id
+  );
 
   return (
     <>
       <Section>
-
         <Container>
-
           <ProductLayout
             gallery={
               <ProductGallery
@@ -59,30 +46,24 @@ export default async function ProductPage({
             }
             info={
               <ProductInfo
-                id={product.id}
+                publicId={product.public_id}
                 name={product.name}
                 price={product.price}
-                discountPrice={product.discountPrice}
-                shortDescription={product.shortDescription}
+                discountPrice={product.discount_price}
+                shortDescription={product.short_description}
               />
             }
           />
-
         </Container>
-
       </Section>
 
       {relatedProducts.length > 0 && (
         <Section>
-
           <Container>
-
             <RelatedProducts
               products={relatedProducts}
             />
-
           </Container>
-
         </Section>
       )}
     </>

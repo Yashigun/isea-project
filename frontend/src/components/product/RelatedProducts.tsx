@@ -1,6 +1,6 @@
 import ProductGrid from "../ProductGrid";
 
-import { Product } from "@/types/product";
+import { Product } from "@/services/product";
 
 interface RelatedProductsProps {
   products: Product[];
@@ -11,15 +11,11 @@ export default function RelatedProducts({
 }: RelatedProductsProps) {
   return (
     <div className="space-y-8">
-
       <h2 className="text-3xl font-medium">
         You may also like
       </h2>
 
-      <ProductGrid
-        products={products}
-      />
-
+      <ProductGrid products={products} />
     </div>
   );
 }

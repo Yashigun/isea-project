@@ -9,15 +9,14 @@ import WishlistButton from "../common/WishlistButton";
 import AddToCartButton from "../common/AddToCartButton";
 
 interface ProductInfoProps {
-  id: string;
-  name: string;
-  price: number;
-  discountPrice?: number;
-  shortDescription: string;
+    publicId: string;
+    name: string;
+    price: number;
+    discountPrice: number | null;
+    shortDescription: string | null;
 }
-
 export default function ProductInfo({
-  id,
+  publicId,
   name,
   price,
   discountPrice,
@@ -40,7 +39,7 @@ export default function ProductInfo({
 
             <ProductPrice
               price={price}
-              discountPrice={discountPrice}
+              discountPrice={discountPrice ?? undefined}
             />
 
           </div>
