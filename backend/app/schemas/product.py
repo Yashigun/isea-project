@@ -96,20 +96,14 @@ class ProductImageResponseSchema(BaseResponseSchema):
     """
     Product image.
     """
-
     stored_filename: str
-
     original_filename: str
-
     mime_type: str
-
     file_size: int
-
     alt_text: str | None
-
     display_order: int
-
     is_primary: bool
+    url: str 
 
 
 # --------------------------------------------------
@@ -350,3 +344,5 @@ class ProductResponseSchema(ProductSummarySchema):
     images: list[ProductImageResponseSchema] = Field(
         default_factory=list,
     )
+    primary_image: str | None = None  
+    

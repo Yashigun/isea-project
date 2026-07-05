@@ -10,7 +10,12 @@ from app.security.cookies import ACCESS_COOKIE_NAME
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
+async def get_token_from_request(request: Request) -> str:
+    # Debug log
+    print(f"Headers: {request.headers}")
+    print(f"Cookies: {request.cookies}")
 
+    
 async def get_token_from_request(request: Request) -> str:
     """
     Extract the JWT token from either the Authorization header
@@ -68,10 +73,6 @@ async def get_current_user(
             detail="Account is not active",
         )
 
-    # Store customer ID in request state for logging
-    # (optional – used by request logging middleware)
-    # request.state.customer_id = customer.id
-
     return customer
 
 
@@ -89,7 +90,7 @@ async def get_current_admin(
     return current_user
 
 
-def get_client_ip(request: Request) -> str:
+async def get_client_ip(request: Request) -> str:
     """
     Extract client IP address from the request.
     """
@@ -100,8 +101,9 @@ def get_client_ip(request: Request) -> str:
     return request.client.host if request.client else "0.0.0.0"
 
 
-def get_user_agent(request: Request) -> str:
+async def get_user_agent(request: Request) -> str:
     """
     Extract User-Agent header from the request.
     """
     return request.headers.get("user-agent", "")
+

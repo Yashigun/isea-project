@@ -4,10 +4,11 @@ from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.store.phone_number import PhoneNumber
 from app.repositories.base import BaseRepository
-
+from app.models.store.product import Product
 
 class PhoneRepository(BaseRepository[PhoneNumber]):
     """
@@ -75,3 +76,16 @@ class PhoneRepository(BaseRepository[PhoneNumber]):
         stmt = select(PhoneNumber.id).where(PhoneNumber.phone_number == phone_number)
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none() is not None
+    
+    async def list_active(self) -> list[Product]:
+        stmt = (
+            select(Product)
+            .where(Product.is_active.is_(True))
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+            )
+            .order_by(Product.name.asc())
+        )
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())

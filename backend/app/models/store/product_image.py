@@ -15,7 +15,7 @@ from app.db.database import Base
 from app.models.base import TimestampMixin, UUIDMixin, PublicIdMixin
 
 
-class ProductImage( Base, UUIDMixin, TimestampMixin, PublicIdMixin):
+class ProductImage(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     
     __tablename__ = "product_images"
 
@@ -40,6 +40,12 @@ class ProductImage( Base, UUIDMixin, TimestampMixin, PublicIdMixin):
         ),
         nullable=False,
         index=True,
+    )
+
+    # ✅ REQUIRED – Cloudinary URL
+    url: Mapped[str] = mapped_column(
+        String(500),
+        nullable=False,  # Change from nullable=True to False
     )
 
     stored_filename: Mapped[str] = mapped_column(

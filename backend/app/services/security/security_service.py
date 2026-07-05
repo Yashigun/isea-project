@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime, timedelta, UTC
+from typing import Any, Dict, Optional
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -328,6 +328,7 @@ class SecurityService:
             "blocked_ips": blocked_ips,
             "top_ips": top_ips,
         }
+        
 
     # ---------------------------------------------------------
     # Helpers
@@ -382,3 +383,4 @@ async def create_security_event_async(
             request_id=request_id,
             evidence=evidence,
         )
+        

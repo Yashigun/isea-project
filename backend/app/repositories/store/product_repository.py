@@ -24,17 +24,38 @@ class ProductRepository(BaseRepository[Product]):
     # ---------------------------------------------------------
 
     async def get_by_id(self, product_id) -> Product | None:
-        stmt = select(Product).where(Product.id == product_id)
+        stmt = (
+            select(Product)
+            .where(Product.id == product_id)
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+            )
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
     async def get_by_public_id(self, public_id: str) -> Product | None:
-        stmt = select(Product).where(Product.public_id == public_id)
+        stmt = (
+            select(Product)
+            .where(Product.public_id == public_id)
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+            )
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
     async def get_by_slug(self, slug: str) -> Product | None:
-        stmt = select(Product).where(Product.slug == slug)
+        stmt = (
+            select(Product)
+            .where(Product.slug == slug)
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+            )
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -47,6 +68,10 @@ class ProductRepository(BaseRepository[Product]):
         stmt = (
             select(Product)
             .where(Product.is_active.is_(True))
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+            )
             .order_by(Product.name.asc())
         )
         result = await self.db.execute(stmt)
@@ -57,6 +82,10 @@ class ProductRepository(BaseRepository[Product]):
             select(Product)
             .where(Product.category_id == category_id)
             .where(Product.is_active.is_(True))
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+            )
             .order_by(Product.name.asc())
         )
         result = await self.db.execute(stmt)
@@ -73,6 +102,10 @@ class ProductRepository(BaseRepository[Product]):
                     Product.short_description.ilike(pattern),
                     Product.description.ilike(pattern),
                 )
+            )
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
             )
             .order_by(Product.name.asc())
         )
@@ -98,6 +131,10 @@ class ProductRepository(BaseRepository[Product]):
             .where(Product.category_id == category_id)
             .where(Product.id != exclude_product_id)
             .where(Product.is_active.is_(True))
+            .options(
+                selectinload(Product.category),
+                selectinload(Product.images),
+            )
             .limit(limit)
         )
         result = await self.db.execute(stmt)

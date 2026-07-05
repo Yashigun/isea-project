@@ -1,7 +1,8 @@
 from functools import lru_cache
+from typing import List, Optional
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Optional
+
 
 class Settings(BaseSettings):
     APP_NAME: str
@@ -23,7 +24,9 @@ class Settings(BaseSettings):
     COOKIE_HTTPONLY: bool
     COOKIE_SAMESITE: str
 
-    ALLOWED_ORIGINS: List[str] = Field(default_factory=list)
+    # CORS – stored as a comma-separated string to avoid JSON parsing issues
+    ALLOWED_ORIGINS_RAW: str = Field(default="", alias="ALLOWED_ORIGINS")
+
     LOG_LEVEL: str
 
     MAX_LOGIN_ATTEMPTS: int
@@ -33,14 +36,18 @@ class Settings(BaseSettings):
     RATE_LIMIT_REQUESTS: int
     RATE_LIMIT_WINDOW_SECONDS: int
 
-    REDIS_URL: Optional[str] = None   # optional
+    REDIS_URL: Optional[str] = None
 
-    @field_validator("ALLOWED_ORIGINS", mode="before")
-    @classmethod
-    def parse_origins(cls, v):
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",")]
-        return v
+    # Cloudinary
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
+    CLOUDINARY_UPLOAD_PRESET: str = ""
+
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GOOGLE_REDIRECT_URI: str = ""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -49,8 +56,17 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @property
+    def ALLOWED_ORIGINS(self) -> List[str]:
+        """Parse the comma-separated string into a list of origins."""
+        if not self.ALLOWED_ORIGINS_RAW:
+            return []
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS_RAW.split(",") if origin.strip()]
+
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
 
 settings = get_settings()

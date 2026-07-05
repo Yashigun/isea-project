@@ -12,6 +12,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from app.db.database import Base
 from app.models.base import TimestampMixin, UUIDMixin, PublicIdMixin
@@ -100,3 +101,11 @@ class Product(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     reviews: Mapped[list["ProductReview"]] = relationship(
         back_populates="product",
     )
+    
+    @hybrid_property
+    def primary_image(self) -> str | None:
+        if self.images:
+            # Get the first image marked as primary, or the first image
+            primary = next((img for img in self.images if img.is_primary), None)
+            return primary.url if primary else self.images[0].url
+        return None

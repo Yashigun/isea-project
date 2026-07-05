@@ -228,3 +228,15 @@ class LoginAttemptRepository(BaseRepository[LoginAttempt]):
             list(result.scalars().all()),
             total,
         )
+        
+    async def count_recent_failures_all(self, since: datetime) -> int:
+        """
+        Count all failed login attempts since the given time, regardless of IP.
+        """
+        stmt = (
+            select(func.count(LoginAttempt.id))
+            .where(LoginAttempt.successful.is_(False))
+            .where(LoginAttempt.created_at >= since)
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0

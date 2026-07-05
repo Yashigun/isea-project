@@ -40,3 +40,7 @@ export const categoryService = {
     await api.delete(`/categories/${publicId}`);
   },
 };
+
+// Named exports for compatibility
+export const getCategoryBySlug = (slug: string) => categoryService.getBySlug(slug);
+export const getCategories = (activeOnly = true) => categoryService.getAll(activeOnly);
