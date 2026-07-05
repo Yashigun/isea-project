@@ -5,6 +5,7 @@ export interface Review {
   rating: number;
   title: string;
   review: string;
+  age: string | null;
   customer: {
     public_id: string;
     first_name: string;
@@ -14,17 +15,22 @@ export interface Review {
 }
 
 export const reviewService = {
+  async listAll(limit?: number): Promise<Review[]> {
+    const response = await api.get("/reviews/", { params: limit ? { limit } : undefined });
+    return response.data;
+  },
+
   async getProductReviews(productPublicId: string): Promise<Review[]> {
     const response = await api.get(`/reviews/product/${productPublicId}`);
     return response.data;
   },
 
-  async create(productPublicId: string, data: { rating: number; title: string; review: string }): Promise<Review> {
+  async create(productPublicId: string, data: { rating: number; title: string; review: string; age?: string | null }): Promise<Review> {
     const response = await api.post(`/reviews/product/${productPublicId}`, data);
     return response.data;
   },
 
-  async update(reviewPublicId: string, data: { rating?: number; title?: string; review?: string }): Promise<Review> {
+  async update(reviewPublicId: string, data: { rating?: number; title?: string; review?: string; age?: string | null }): Promise<Review> {
     const response = await api.put(`/reviews/${reviewPublicId}`, data);
     return response.data;
   },

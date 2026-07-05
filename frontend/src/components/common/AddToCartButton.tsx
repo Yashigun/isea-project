@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { cartService } from "@/services/cart";
 import { useState } from "react";
+import type { MouseEvent } from "react";
 
 interface AddToCartButtonProps {
   productPublicId?: string;
@@ -18,8 +19,12 @@ export default function AddToCartButton({
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [added, setAdded] = useState(false);
 
-  const handleClick = async () => {
+  const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     if (!isAuthenticated) {
       sessionStorage.setItem("returnUrl", window.location.pathname);
       router.push("/auth/signup");
@@ -33,9 +38,11 @@ export default function AddToCartButton({
 
     setLoading(true);
     try {
-      await cartService.addItem(productPublicId, quantity);
-      // You can show a toast or notification here
-      console.log("Added to cart");
+      const cart = await cartService.addItem(productPublicId, quantity);
+      setAdded(true);
+      window.dispatchEvent(
+        new CustomEvent("cart:updated", { detail: { totalItems: cart.total_items } })
+      );
     } catch (error) {
       console.error("Failed to add to cart:", error);
     } finally {
@@ -51,7 +58,7 @@ export default function AddToCartButton({
       className="flex w-full items-center justify-center gap-2 rounded-full border border-black py-3 transition-all duration-300 hover:bg-black hover:text-white disabled:opacity-50"
     >
       <ShoppingBag size={18} />
-      {loading ? "Adding..." : "Add to Cart"}
+      {loading ? "Adding..." : added ? "Added to Cart" : "Add to Cart"}
     </button>
   );
 }

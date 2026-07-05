@@ -3,7 +3,7 @@ import { Product } from "./product";
 
 export const wishlistService = {
   async get(): Promise<Product[]> {
-    const response = await api.get("/wishlist");
+    const response = await api.get("/wishlist/");
     return response.data;
   },
 

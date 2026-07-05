@@ -41,7 +41,8 @@ class CartRepository(BaseRepository[Cart]):
         stmt = (
             select(Cart)
             .options(
-                selectinload(Cart.items).selectinload(CartItem.product).selectinload(Product.images)
+                selectinload(Cart.items).selectinload(CartItem.product).selectinload(Product.category),
+                selectinload(Cart.items).selectinload(CartItem.product).selectinload(Product.images),
             )
             .where(Cart.customer_id == customer_id)
         )
@@ -64,7 +65,10 @@ class CartRepository(BaseRepository[Cart]):
     async def get_cart_items(self, cart_id: UUID) -> list[CartItem]:
         stmt = (
             select(CartItem)
-            .options(selectinload(CartItem.product).selectinload(Product.images))
+            .options(
+                selectinload(CartItem.product).selectinload(Product.category),
+                selectinload(CartItem.product).selectinload(Product.images),
+            )
             .where(CartItem.cart_id == cart_id)
         )
         result = await self.db.execute(stmt)

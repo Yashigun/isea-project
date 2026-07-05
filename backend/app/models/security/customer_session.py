@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
+
 from sqlalchemy.dialects.postgresql import INET
 
 from sqlalchemy import (
@@ -23,7 +25,9 @@ from app.models.base import (
     TimestampMixin,
     PublicIdMixin
 )
-from app.models.store.customer import Customer
+
+if TYPE_CHECKING:
+    from app.models.store.customer import Customer
 
 
 class CustomerSession( Base, UUIDMixin, TimestampMixin, PublicIdMixin):

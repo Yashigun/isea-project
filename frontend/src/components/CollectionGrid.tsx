@@ -20,7 +20,7 @@ export default function CollectionGrid({
     >
       {categories.map((category) => (
         <CollectionCard
-          key={category.id}
+          key={category.public_id}
           category={category}
         />
       ))}

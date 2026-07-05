@@ -40,6 +40,11 @@ class ProductReviewCreateSchema(BaseRequestSchema):
         max_length=5000,
     )
 
+    age: str | None = Field(
+        default=None,
+        max_length=20,
+    )
+
     @field_validator("title")
     @classmethod
     def validate_review_title(
@@ -85,6 +90,11 @@ class ProductReviewUpdateSchema(BaseRequestSchema):
         max_length=5000,
     )
 
+    age: str | None = Field(
+        default=None,
+        max_length=20,
+    )
+
     @field_validator("title")
     @classmethod
     def validate_review_title(
@@ -120,5 +130,7 @@ class ProductReviewResponseSchema(BaseResponseSchema):
     title: str
 
     review: str
+
+    age: str | None = None
 
     customer: CustomerResponseSchema

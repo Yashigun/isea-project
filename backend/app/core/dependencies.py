@@ -11,32 +11,26 @@ from app.security.cookies import ACCESS_COOKIE_NAME
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
 async def get_token_from_request(request: Request) -> str:
-    # Debug log
-    print(f"Headers: {request.headers}")
-    print(f"Cookies: {request.cookies}")
-
-    
-async def get_token_from_request(request: Request) -> str:
-    """
-    Extract the JWT token from either the Authorization header
-    or the secure HttpOnly cookie.
-    """
-    # 1. Try Authorization header
-    auth_header = request.headers.get("Authorization")
-    if auth_header and auth_header.startswith("Bearer "):
-        return auth_header.split(" ")[1]
-
-    # 2. Try cookie
     token = request.cookies.get(ACCESS_COOKIE_NAME)
     if token:
         return token
 
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Not authenticated",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    auth_header = request.headers.get("Authorization")
+    if auth_header and auth_header.startswith("Bearer "):
+        return auth_header.split(" ", 1)[1]
 
+    fallback_header = request.headers.get("x-access-token")
+    if fallback_header:
+        return fallback_header
+
+    query_token = request.query_params.get("access_token")
+    if query_token:
+        return query_token
+
+    raise HTTPException(
+        status_code=401,
+        detail="Not authenticated",
+    )
 
 async def get_current_user(
     token: str = Depends(get_token_from_request),

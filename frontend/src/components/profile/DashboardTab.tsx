@@ -4,8 +4,7 @@ import { Cart } from "@/services/cart";
 import { Product } from "@/services/product";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingBag, X } from "lucide-react";
-import { cartService } from "@/services/cart";
+import { Heart, PackageCheck, ReceiptText, X } from "lucide-react";
 import { wishlistService } from "@/services/wishlist";
 import { useState } from "react";
 
@@ -16,22 +15,14 @@ interface DashboardTabProps {
 }
 
 export default function DashboardTab({
-  cart,
   wishlist,
   onRefresh,
 }: DashboardTabProps) {
   const [removing, setRemoving] = useState<string | null>(null);
-
-  const handleRemoveFromCart = async (productPublicId: string) => {
-    setRemoving(productPublicId);
-    try {
-      await cartService.removeItem(productPublicId);
-      onRefresh();
-    } catch (error) {
-      console.error("Failed to remove from cart:", error);
-    } finally {
-      setRemoving(null);
-    }
+  const getImage = (image: string | null | undefined) => {
+    if (!image) return "/placeholder.jpg";
+    if (image.startsWith("//")) return `https:${image}`;
+    return image.replace("http://res.cloudinary.com", "https://res.cloudinary.com");
   };
 
   const handleRemoveFromWishlist = async (productPublicId: string) => {
@@ -50,7 +41,27 @@ export default function DashboardTab({
     <div className="space-y-8">
       <h1 className="text-3xl font-bold">Dashboard</h1>
 
-      {/* Wishlist Section */}
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-xl border bg-white p-5">
+          <div className="flex items-center gap-2">
+            <PackageCheck size={22} />
+            <h2 className="text-xl font-semibold">Past Orders</h2>
+          </div>
+          <p className="mt-5 rounded-lg bg-gray-50 p-5 text-center text-gray-500">
+            No past orders yet.
+          </p>
+        </div>
+        <div className="rounded-xl border bg-white p-5">
+          <div className="flex items-center gap-2">
+            <ReceiptText size={22} />
+            <h2 className="text-xl font-semibold">Invoices</h2>
+          </div>
+          <p className="mt-5 rounded-lg bg-gray-50 p-5 text-center text-gray-500">
+            No invoices yet.
+          </p>
+        </div>
+      </section>
+
       <section>
         <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
           <Heart className="text-red-500" size={24} />
@@ -72,7 +83,7 @@ export default function DashboardTab({
               >
                 <Link href={`/products/${product.slug}`} className="flex-shrink-0">
                   <Image
-                    src={product.primary_image || "/placeholder.jpg"}
+                    src={getImage(product.primary_image)}
                     alt={product.name}
                     width={80}
                     height={80}
@@ -94,59 +105,6 @@ export default function DashboardTab({
                 </button>
               </div>
             ))}
-          </div>
-        )}
-      </section>
-
-      {/* Cart Section */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-          <ShoppingBag size={24} />
-          Cart
-          <span className="text-sm font-normal text-gray-500 ml-2">
-            ({cart?.total_items || 0} items)
-          </span>
-        </h2>
-        {!cart || cart.items.length === 0 ? (
-          <p className="text-gray-500 py-8 text-center bg-gray-50 rounded-xl">
-            Your cart is empty. Start shopping!
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {cart.items.map((item) => (
-              <div
-                key={item.product.public_id}
-                className="bg-white rounded-xl shadow-sm border p-4 flex items-center gap-4"
-              >
-                <Link href={`/products/${item.product.slug}`} className="flex-shrink-0">
-                  <Image
-                    src={item.product.primary_image || "/placeholder.jpg"}
-                    alt={item.product.name}
-                    width={80}
-                    height={80}
-                    className="rounded-lg object-cover w-20 h-20"
-                  />
-                </Link>
-                <div className="flex-1 min-w-0">
-                  <Link href={`/products/${item.product.slug}`}>
-                    <h3 className="font-medium truncate">{item.product.name}</h3>
-                  </Link>
-                  <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                  <p className="text-sm font-semibold">₹{item.subtotal}</p>
-                </div>
-                <button
-                  onClick={() => handleRemoveFromCart(item.product.public_id)}
-                  disabled={removing === item.product.public_id}
-                  className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-            ))}
-            <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center">
-              <span className="font-semibold">Total:</span>
-              <span className="text-xl font-bold">₹{cart.total_amount}</span>
-            </div>
           </div>
         )}
       </section>

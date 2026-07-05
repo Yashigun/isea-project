@@ -34,7 +34,7 @@ export default function AddressForm({
     try {
       const data = {
         address_line_1: addressLine1,
-        address_line_2: addressLine2 || undefined,
+        address_line_2: addressLine2 || null,
         city,
         state,
         country,
@@ -42,7 +42,7 @@ export default function AddressForm({
         is_default: isDefault,
       };
 
-      console.log("📦 Saving address:", data);
+      console.log("Saving address:", data);
 
       if (initialData) {
         await addressService.update(initialData.public_id, data);
@@ -50,7 +50,7 @@ export default function AddressForm({
         await addressService.create(data);
       }
 
-      console.log("✅ Address saved successfully");
+      console.log("Address saved successfully");
       onSuccess();
     } catch (err: any) {
       console.error("❌ Failed to save address:", err);

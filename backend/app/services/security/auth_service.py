@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
@@ -52,13 +52,13 @@ class AuthService:
             return None
         if customer.account_status != AccountStatus.ACTIVE:
             return None
-        if customer.locked_until and customer.locked_until > datetime.utcnow():
+        if customer.locked_until and customer.locked_until > datetime.now(timezone.utc):
             raise AccountLockedError("Account temporarily locked")
         if not verify_password(password, customer.password_hash):
             await self._record_failed_attempt(customer, ip, user_agent)
             return None
         customer.failed_login_count = 0
-        customer.last_login_at = datetime.utcnow()
+        customer.last_login_at = datetime.now(timezone.utc)
         await self.customer_repo.save(customer)
         return customer
 
@@ -75,7 +75,7 @@ class AuthService:
         await self.login_attempt_repo.create(attempt)
         customer.failed_login_count += 1
         if customer.failed_login_count >= settings.MAX_LOGIN_ATTEMPTS:
-            customer.locked_until = datetime.utcnow() + timedelta(minutes=settings.ACCOUNT_LOCK_MINUTES)
+            customer.locked_until = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCOUNT_LOCK_MINUTES)
         await self.customer_repo.save(customer)
 
     async def create_session(self, customer: Customer, ip: str, user_agent: str):
@@ -84,15 +84,16 @@ class AuthService:
             refresh_token_hash="",  # placeholder
             ip_address=ip,
             user_agent=user_agent,
-            login_at=datetime.utcnow(),
-            last_activity=datetime.utcnow(),
-            expires_at=datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+            login_at=datetime.now(timezone.utc),
+            last_activity=datetime.now(timezone.utc),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
         )
         await self.session_repo.create(session)
         # Generate refresh token with session public_id as subject
         refresh_token = create_refresh_token(str(session.public_id))
         session.refresh_token_hash = hash_refresh_token(refresh_token)
         await self.session_repo.save(session)
+        await self.db.commit()
         # Access token with email as subject
         access_token = create_access_token(customer.email)
         return session, access_token, refresh_token
@@ -108,7 +109,7 @@ class AuthService:
         session = await self.session_repo.get_by_public_id(session_public_id)
         if not session or session.revoked_at is not None:
             raise InvalidTokenError("Session revoked or not found")
-        if session.expires_at < datetime.utcnow():
+        if session.expires_at < datetime.now(timezone.utc):
             raise InvalidTokenError("Refresh token expired")
         if not verify_refresh_token_hash(refresh_token, session.refresh_token_hash):
             raise InvalidTokenError("Token mismatch")
@@ -127,7 +128,10 @@ class AuthService:
             raise InvalidTokenError("Invalid refresh token payload")
         session = await self.session_repo.get_by_public_id(session_public_id)
         if session:
-            await self.session_repo.revoke(session, datetime.utcnow())
+            session.revoked_at = datetime.now(timezone.utc)
+            session.last_activity = datetime.now(timezone.utc)
+            await self.session_repo.save(session)
+            await self.db.commit()
 
     async def change_password(self, customer: Customer, current_password: str, new_password: str) -> None:
         if customer.auth_provider != AuthProvider.EMAIL:

@@ -69,7 +69,7 @@ export default function LoginAttemptsTab() {
             { key: "ip_address", label: "IP" },
             { key: "successful", label: "Success", render: (v) => (v ? "✅" : "❌") },
             { key: "failure_reason", label: "Failure Reason" },
-            { key: "created_at", label: "Time", render: (v) => new Date(v).toLocaleString() },
+            { key: "created_at", label: "Time", render: (v) => typeof v === "string" ? new Date(v).toLocaleString() : "" },
           ]}
           data={attempts}
         />

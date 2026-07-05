@@ -5,6 +5,7 @@ import ProductLayout from "@/components/product/ProductLayout";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductInfo from "@/components/product/ProductInfo";
 import RelatedProducts from "@/components/product/RelatedProducts";
+import ProductReviews from "@/components/product/ProductReviews";
 
 import { productService } from "@/services/product";
 
@@ -42,6 +43,7 @@ export default async function ProductPage({
               <ProductGallery
                 images={product.images}
                 name={product.name}
+                primaryImage={product.primary_image}
               />
             }
             info={
@@ -51,6 +53,7 @@ export default async function ProductPage({
                 price={product.price}
                 discountPrice={product.discount_price}
                 shortDescription={product.short_description}
+                description={product.description}
               />
             }
           />
@@ -66,6 +69,12 @@ export default async function ProductPage({
           </Container>
         </Section>
       )}
+
+      <Section>
+        <Container>
+          <ProductReviews productPublicId={product.public_id} />
+        </Container>
+      </Section>
     </>
   );
 }

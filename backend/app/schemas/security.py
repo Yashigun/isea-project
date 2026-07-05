@@ -2,6 +2,8 @@ from datetime import datetime
 from ipaddress import IPv4Address, IPv6Address
 from typing import Optional
 
+from app.schemas.common import BaseResponseSchema
+
 from app.models.security.request_log import HttpMethod
 from pydantic import BaseModel, ConfigDict
 
@@ -33,8 +35,7 @@ from ipaddress import IPv4Address, IPv6Address
 # Security Events
 # -------------------------------------------------------
 
-class SecurityEventResponse(BaseModel):
-    public_id: str
+class SecurityEventResponse(BaseResponseSchema):
     event_type: SecurityEventType
     severity: EventSeverity
     title: str
@@ -43,12 +44,7 @@ class SecurityEventResponse(BaseModel):
     country: Optional[str] = None
     city: Optional[str] = None
     resolved: bool
-    created_at: datetime
     evidence: Optional[dict] = None
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
 
 
 # -------------------------------------------------------
@@ -57,8 +53,7 @@ class SecurityEventResponse(BaseModel):
 
 
 
-class RequestLogResponse(BaseModel):
-    public_id: str
+class RequestLogResponse(BaseResponseSchema):
     method: HttpMethod
     protocol: HttpProtocol
     source: RequestSource
@@ -72,11 +67,7 @@ class RequestLogResponse(BaseModel):
     user_agent: str
     country: str | None = None
     city: str | None = None
-    created_at: datetime
     customer_id: UUID | None = None
-    model_config = ConfigDict(
-        from_attributes=True
-    )
 
 
 class RequestLogListResponse(BaseModel):
@@ -90,20 +81,14 @@ class RequestLogListResponse(BaseModel):
 # Login Attempts
 # -------------------------------------------------------
 
-class LoginAttemptResponse(BaseModel):
-    public_id: str
+class LoginAttemptResponse(BaseResponseSchema):
     email: str
     ip_address: IPv4Address | IPv6Address
     user_agent: str
     successful: bool
     failure_reason: AuthenticationFailureReason | None = None
     attempt_type: AttemptType
-    created_at: datetime
     customer_id: UUID | None = None
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
 
 class LoginAttemptListResponse(BaseModel):
     items: list[LoginAttemptResponse]
@@ -118,8 +103,7 @@ class LoginAttemptListResponse(BaseModel):
 
 
 
-class AuditLogResponse(BaseModel):
-    public_id: str
+class AuditLogResponse(BaseResponseSchema):
     action: AuditAction
     entity_type: EntityType
     entity_name: str | None = None
@@ -128,11 +112,7 @@ class AuditLogResponse(BaseModel):
     new_data: dict | None = None
     ip_address: IPv4Address | IPv6Address
     user_agent: str
-    created_at: datetime
     customer_id: UUID | None = None
-    model_config = ConfigDict(
-        from_attributes=True
-    )
 
 class AuditLogListResponse(BaseModel):
     items: list[AuditLogResponse]
@@ -145,8 +125,7 @@ class AuditLogListResponse(BaseModel):
 # Blocked IPs
 # -------------------------------------------------------
 
-class BlockedIPResponse(BaseModel):
-    public_id: str
+class BlockedIPResponse(BaseResponseSchema):
     ip_address: IPv4Address | IPv6Address
     reason: BlockReason
     blocked_by: str
@@ -154,11 +133,6 @@ class BlockedIPResponse(BaseModel):
     blocked_until: Optional[datetime] = None
     permanently_blocked: bool
     is_active: bool
-    created_at: datetime
-
-    model_config = ConfigDict(
-        from_attributes=True
-    )
 
 
 class BlockedIPListResponse(BaseModel):

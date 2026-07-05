@@ -42,10 +42,10 @@ class ProductImage(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
         index=True,
     )
 
-    # ✅ REQUIRED – Cloudinary URL
+    # Required Cloudinary URL.
     url: Mapped[str] = mapped_column(
         String(500),
-        nullable=False,  # Change from nullable=True to False
+        nullable=False,
     )
 
     stored_filename: Mapped[str] = mapped_column(

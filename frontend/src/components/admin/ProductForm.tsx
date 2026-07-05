@@ -8,7 +8,7 @@ import { productService } from "@/services/product";
 interface ProductFormProps {
   categories: Category[];
   initialData?: Product | null;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: any) => Promise<any>;
 }
 
 export default function ProductForm({ categories, initialData, onSubmit }: ProductFormProps) {
@@ -20,7 +20,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
   const [shortDescription, setShortDescription] = useState(initialData?.short_description || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [isActive, setIsActive] = useState(initialData?.is_active ?? true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +45,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
         throw new Error("Price must be greater than 0.");
       }
 
-      // 🔥 Build ONLY the fields allowed by the backend schema
+      // Build only the fields allowed by the backend schema.
       const productData: any = {
         category_public_id: categoryPublicId,
         name: name.trim(),
@@ -68,20 +68,18 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
         }
       }
 
-      console.log("📦 Sending product data:", productData);
+      const product = await onSubmit(productData);
 
-      // Create product
-      const product = await productService.create(productData);
-
-      // Upload image if selected
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        formData.append("product_public_id", product.public_id);
-        await productService.uploadImage(formData);
+      if (imageFiles.length > 0 && product?.public_id) {
+        await Promise.all(
+          imageFiles.map((file) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            return productService.uploadImage(formData, product.public_id);
+          })
+        );
       }
 
-      // Reset form after successful creation
       if (!initialData) {
         setName("");
         setSlug("");
@@ -90,13 +88,11 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
         setShortDescription("");
         setDescription("");
         setCategoryPublicId("");
-        setImageFile(null);
+        setImageFiles([]);
         setIsActive(true);
       }
-
-      await onSubmit(product);
     } catch (err: any) {
-      console.error("❌ Error creating product:", err);
+      console.error("Error creating product:", err);
       if (err.response) {
         const detail = err.response.data?.detail;
         if (Array.isArray(detail)) {
@@ -221,14 +217,15 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
       </div>
 
       <div>
-        <label className="block text-sm font-medium">Product Image</label>
+        <label className="block text-sm font-medium">Product Images</label>
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+          multiple
+          onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
           className="mt-1"
         />
-        <p className="text-xs text-gray-500 mt-1">Max size: 10MB. Formats: JPEG, PNG, WEBP, GIF</p>
+        <p className="text-xs text-gray-500 mt-1">Max size: 10MB each. Formats: JPEG, PNG, WEBP, GIF</p>
       </div>
 
       <div className="flex items-center gap-2">

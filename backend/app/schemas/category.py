@@ -117,6 +117,8 @@ class CategoryResponseSchema(BaseResponseSchema):
 
     is_active: bool
 
+    image: str | None = None
+
 
 class CategorySummarySchema(BaseResponseSchema):
     """

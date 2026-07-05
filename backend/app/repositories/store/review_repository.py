@@ -31,9 +31,24 @@ class ReviewRepository(BaseRepository[ProductReview]):
         return result.scalar_one_or_none()
 
     async def get_by_public_id(self, public_id: str) -> ProductReview | None:
-        stmt = select(ProductReview).where(ProductReview.public_id == public_id)
+        stmt = (
+            select(ProductReview)
+            .options(selectinload(ProductReview.customer))
+            .where(ProductReview.public_id == public_id)
+        )
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def list_recent(self, limit: int | None = None) -> list[ProductReview]:
+        stmt = (
+            select(ProductReview)
+            .options(selectinload(ProductReview.customer))
+            .order_by(ProductReview.created_at.desc())
+        )
+        if limit:
+            stmt = stmt.limit(limit)
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
 
     async def get_customer_review(self, customer_id: UUID, product_id: UUID) -> ProductReview | None:
         stmt = (

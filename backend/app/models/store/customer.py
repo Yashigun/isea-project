@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
 from app.models.base import TimestampMixin, UUIDMixin, PublicIdMixin
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 
 class AccountStatus(str, Enum):
@@ -128,3 +128,27 @@ class Customer(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     security_events: Mapped[list["SecurityEvent"]] = relationship(
         back_populates="customer",
     )
+
+
+from app.models.security.audit_log import AuditLog
+from app.models.security.customer_session import CustomerSession
+from app.models.security.login_attempt import LoginAttempt
+from app.models.security.request_log import RequestLog
+from app.models.security.security_event import SecurityEvent
+from app.models.store.address import Address
+from app.models.store.cart import Cart
+from app.models.store.order import Order
+from app.models.store.phone_number import PhoneNumber
+from app.models.store.review import ProductReview
+if TYPE_CHECKING:
+    from app.models.security.audit_log import AuditLog
+    from app.models.security.customer_session import CustomerSession
+    from app.models.security.login_attempt import LoginAttempt
+    from app.models.security.request_log import RequestLog
+    from app.models.security.security_event import SecurityEvent
+    from app.models.store.address import Address
+    from app.models.store.cart import Cart
+    from app.models.store.order import Order
+    from app.models.store.phone_number import PhoneNumber
+    from app.models.store.review import ProductReview
+    from app.models.store.wishlist_item import WishlistItem

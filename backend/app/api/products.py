@@ -33,17 +33,6 @@ async def list_products(
         products = await service.list_active()
     return products
 
-@router.get("/{public_id}", response_model=ProductResponseSchema)
-async def get_product(
-    public_id: str,
-    db: AsyncSession = Depends(get_db),
-):
-    service = ProductService(db)
-    product = await service.get_by_public_id(public_id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product
-
 @router.get("/slug/{slug}", response_model=ProductResponseSchema)
 async def get_product_by_slug(
     slug: str,
@@ -51,6 +40,17 @@ async def get_product_by_slug(
 ):
     service = ProductService(db)
     product = await service.get_by_slug(slug)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
+@router.get("/{public_id}", response_model=ProductResponseSchema)
+async def get_product(
+    public_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    service = ProductService(db)
+    product = await service.get_by_public_id(public_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
@@ -81,7 +81,7 @@ async def create_product(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-    # 🔥 Eagerly load relationships for response
+    # Eagerly load relationships for response.
     stmt = (
         select(Product)
         .where(Product.id == product.id)
@@ -155,7 +155,7 @@ async def upload_product_image(
     if product_public_id:
         service = ProductService(db)
         image_data = {
-            "url": result["url"],
+            "url": result["secure_url"],
             "stored_filename": result["public_id"],
             "original_filename": file.filename,
             "mime_type": file.content_type,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { orderService, Order } from "@/services/order";
 
 const statusOptions = [
@@ -18,7 +18,7 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("");
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
 
     try {
@@ -32,11 +32,11 @@ export default function AdminOrdersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus]);
 
   useEffect(() => {
-    fetchOrders();
-  }, [filterStatus]);
+    void Promise.resolve().then(fetchOrders);
+  }, [fetchOrders]);
 
   const handleStatusChange = async (
     publicId: string,
@@ -48,7 +48,7 @@ export default function AdminOrdersPage() {
         status
       );
 
-      fetchOrders();
+      void fetchOrders();
     } catch (err) {
       console.error(err);
     }

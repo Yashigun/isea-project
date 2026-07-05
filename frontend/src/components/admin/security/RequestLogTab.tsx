@@ -66,7 +66,7 @@ export default function RequestLogsTab() {
             { key: "status_code", label: "Status" },
             { key: "ip_address", label: "IP" },
             { key: "response_time_ms", label: "Response (ms)" },
-            { key: "created_at", label: "Time", render: (v) => new Date(v).toLocaleString() },
+            { key: "created_at", label: "Time", render: (v) => typeof v === "string" ? new Date(v).toLocaleString() : "" },
           ]}
           data={logs}
         />

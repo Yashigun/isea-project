@@ -10,6 +10,8 @@ interface CollectionCardProps {
 export default function CollectionCard({
   category,
 }: CollectionCardProps) {
+  const imageSrc = normalizeImage(category.image);
+
   return (
     <Link
       href={`/collections/${category.slug}`}
@@ -27,7 +29,7 @@ export default function CollectionCard({
       <div className="overflow-hidden rounded-[28px]">
 
         <Image
-          src={category.image}
+          src={imageSrc}
           alt={category.name}
           width={600}
           height={700}
@@ -63,4 +65,10 @@ export default function CollectionCard({
       </div>
     </Link>
   );
+}
+
+function normalizeImage(image: string | null | undefined) {
+  if (!image) return "/placeholder.jpg";
+  if (image.startsWith("//")) return `https:${image}`;
+  return image.replace("http://res.cloudinary.com", "https://res.cloudinary.com");
 }

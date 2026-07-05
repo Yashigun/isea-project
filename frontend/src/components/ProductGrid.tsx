@@ -20,7 +20,7 @@ export default function ProductGrid({
     >
       {products.map((product) => (
         <ProductCard
-          key={product.id}
+          key={product.public_id}
           product={product}
         />
       ))}

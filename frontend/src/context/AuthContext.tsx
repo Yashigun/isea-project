@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { auth, User, RegisterData } from "@/services/auth";
+import { saveAuthTokens, clearAuthTokens } from "@/lib/authStorage";
 
 interface AuthContextType {
   user: User | null;
@@ -59,15 +60,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     // Login response includes access_token, refresh_token, and customer
-    const { customer, access_token } = await auth.login({
+    const { customer, access_token, refresh_token } = await auth.login({
       email,
       password,
     });
 
-    // Store the access token in localStorage for axios interceptor
-    if (access_token) {
-      localStorage.setItem("access_token", access_token);
-    }
+    saveAuthTokens({ access_token, refresh_token });
 
     setUser(customer);
     redirectAfterAuth(customer);
@@ -78,25 +76,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await auth.register(data);
 
     // 2. Login using the same credentials
-    const { customer, access_token } = await auth.login({
+    const { customer, access_token, refresh_token } = await auth.login({
       email: data.email,
       password: data.password,
     });
 
-    // Store the access token
-    if (access_token) {
-      localStorage.setItem("access_token", access_token);
-    }
+    saveAuthTokens({ access_token, refresh_token });
 
     setUser(customer);
     redirectAfterAuth(customer);
   };
 
   const logout = async () => {
-    await auth.logout();
-    localStorage.removeItem("access_token");
-    setUser(null);
-    router.push("/");
+    try {
+      await auth.logout();
+    } catch (error) {
+      console.error("Logout request failed:", error);
+    } finally {
+      clearAuthTokens();
+      setUser(null);
+      router.push("/");
+    }
   };
 
   return (

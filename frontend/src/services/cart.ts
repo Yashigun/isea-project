@@ -27,7 +27,7 @@ export interface Cart {
 
 export const cartService = {
   async get(): Promise<Cart> {
-    const response = await api.get("/cart");
+    const response = await api.get("/cart/");
     return response.data;
   },
 
@@ -50,6 +50,6 @@ export const cartService = {
   },
 
   async clear(): Promise<void> {
-    await api.delete("/cart");
+    await api.delete("/cart/");
   },
 };

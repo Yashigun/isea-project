@@ -23,14 +23,22 @@ class ReviewService:
         reviews = await self.repo.get_product_reviews(product.id)
         return reviews[:limit] if limit else reviews
 
+    async def list_recent(self, limit: int | None = None) -> List[ProductReview]:
+        return await self.repo.list_recent(limit)
+
     async def create(self, customer_id: UUID, product_public_id: str, data: ProductReviewCreateSchema) -> ProductReview:
         product = await self.product_repo.get_active_by_public_id(product_public_id)
         if not product:
             raise ValueError("Product not found")
-        # Check if customer already reviewed this product
         existing = await self.repo.get_customer_review(customer_id, product.id)
         if existing:
-            raise ValueError("You have already reviewed this product")
+            existing.rating = data.rating
+            existing.title = data.title
+            existing.review = data.review
+            await self.repo.save(existing)
+            await self.db.commit()
+            updated = await self.repo.get_by_public_id(existing.public_id)
+            return updated or existing
         review = ProductReview(
             customer_id=customer_id,
             product_id=product.id,
@@ -40,7 +48,8 @@ class ReviewService:
         )
         await self.repo.create(review)
         await self.db.commit()
-        return review
+        created = await self.repo.get_by_public_id(review.public_id)
+        return created or review
 
     async def update(self, customer_id: UUID, public_id: str, data: ProductReviewUpdateSchema) -> ProductReview:
         review = await self.repo.get_by_public_id(public_id)
@@ -54,7 +63,8 @@ class ReviewService:
             review.review = data.review
         await self.repo.save(review)
         await self.db.commit()
-        return review
+        updated = await self.repo.get_by_public_id(public_id)
+        return updated or review
 
     async def delete(self, customer_id: UUID, public_id: str) -> None:
         review = await self.repo.get_by_public_id(public_id)

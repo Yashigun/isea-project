@@ -57,8 +57,8 @@ export default function BlockedIPTab() {
             { key: "blocked_by", label: "Blocked By" },
             { key: "permanently_blocked", label: "Permanent", render: (v) => (v ? "✅" : "❌") },
             { key: "is_active", label: "Active", render: (v) => (v ? "✅" : "❌") },
-            { key: "blocked_until", label: "Expires", render: (v) => v ? new Date(v).toLocaleString() : "Never" },
-            { key: "created_at", label: "Created", render: (v) => new Date(v).toLocaleString() },
+            { key: "blocked_until", label: "Expires", render: (v) => typeof v === "string" && v ? new Date(v).toLocaleString() : "Never" },
+            { key: "created_at", label: "Created", render: (v) => typeof v === "string" ? new Date(v).toLocaleString() : "" },
           ]}
           data={ips}
           onDelete={(row) => row.is_active ? handleUnblock(row.public_id) : undefined}

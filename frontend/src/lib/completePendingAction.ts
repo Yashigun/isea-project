@@ -1,6 +1,6 @@
 import { auth } from "@/services/auth";
-import { cart } from "@/services/cart";
-import { wishlist } from "@/services/wishlist";
+import { cartService } from "@/services/cart";
+import { wishlistService } from "@/services/wishlist";
 
 import {
   getPendingAction,
@@ -14,11 +14,11 @@ export async function completePendingAction() {
 
   switch (pending.type) {
     case "wishlist":
-      await wishlist.add(pending.payload.productId);
+      await wishlistService.add(pending.payload.productId);
       break;
 
     case "cart":
-      await cart.add(pending.payload.productId, pending.payload.quantity);
+      await cartService.addItem(pending.payload.productId, pending.payload.quantity);
       break;
 
     case "checkout":

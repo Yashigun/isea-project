@@ -26,25 +26,45 @@ class CategoryService:
     # Public
     # --------------------------------------------------------
 
+    async def _set_category_image(self, category: Category) -> None:
+        products = await self.product_repo.list_by_category(category.id)
+        for product in products:
+            if product.images:
+                setattr(category, "_image", product.images[0].url)
+                return
+        setattr(category, "_image", "/placeholder.jpg")
+
     async def list_active(self):
-        return await self.repo.get_active_categories()
+        categories = await self.repo.get_active_categories()
+        for category in categories:
+            await self._set_category_image(category)
+        return categories
 
     async def list_all(self):
-        return await self.repo.get_all()
+        categories = await self.repo.get_all()
+        for category in categories:
+            await self._set_category_image(category)
+        return categories
 
     async def get_by_public_id(
         self,
         public_id: str,
     ) -> Optional[Category]:
 
-        return await self.repo.get_by_public_id(public_id)
+        category = await self.repo.get_by_public_id(public_id)
+        if category is not None:
+            await self._set_category_image(category)
+        return category
 
     async def get_by_slug(
         self,
         slug: str,
     ) -> Optional[Category]:
 
-        return await self.repo.get_by_slug(slug)
+        category = await self.repo.get_by_slug(slug)
+        if category is not None:
+            await self._set_category_image(category)
+        return category
 
     # --------------------------------------------------------
     # Admin

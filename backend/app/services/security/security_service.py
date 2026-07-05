@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, UTC, timezone
 from typing import Any, Dict, Optional
 from uuid import UUID
 
@@ -191,7 +191,7 @@ class SecurityService:
                 existing.permanently_blocked = False
 
                 existing.blocked_until = (
-                    datetime.utcnow()
+                    datetime.now(timezone.utc)
                     + timedelta(
                         minutes=expires_in_minutes or 60
                     )
@@ -214,7 +214,7 @@ class SecurityService:
             blocked_until=(
                 None
                 if permanently
-                else datetime.utcnow()
+                else datetime.now(timezone.utc)
                 + timedelta(
                     minutes=expires_in_minutes or 60
                 )
@@ -260,7 +260,7 @@ class SecurityService:
 
         return (
             await self.blocked_ip_repo.list_active_blocks(
-                datetime.utcnow()
+                datetime.now(timezone.utc)
             )
         )
 
@@ -272,7 +272,7 @@ class SecurityService:
         self,
     ) -> dict:
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         last_hour = now - timedelta(hours=1)
 

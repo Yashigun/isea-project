@@ -98,7 +98,10 @@ async def refresh(
     refresh_token = request.cookies.get(REFRESH_COOKIE_NAME)
     if not refresh_token:
         # fallback to request body (for mobile clients)
-        body = await request.json()
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
         refresh_token = body.get("refresh_token")
     if not refresh_token:
         raise HTTPException(status_code=400, detail="Refresh token missing")

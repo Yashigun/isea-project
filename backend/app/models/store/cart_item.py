@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import (
     ForeignKey,
@@ -73,3 +74,13 @@ class CartItem(
     product: Mapped["Product"] = relationship(
         back_populates="cart_items",
     )
+
+    @property
+    def unit_price(self) -> Decimal:
+        if self.product.discount_price is not None:
+            return self.product.discount_price
+        return self.product.price
+
+    @property
+    def subtotal(self) -> Decimal:
+        return self.unit_price * self.quantity

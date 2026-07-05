@@ -11,6 +11,16 @@ from typing import List, Optional
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 
+@router.get("/", response_model=List[ProductReviewResponseSchema])
+async def list_reviews(
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get recent reviews across the shop."""
+    service = ReviewService(db)
+    return await service.list_recent(limit)
+
+
 @router.get("/product/{product_public_id}", response_model=List[ProductReviewResponseSchema])
 async def get_product_reviews(
     product_public_id: str,

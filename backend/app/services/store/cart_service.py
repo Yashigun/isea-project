@@ -17,7 +17,13 @@ class CartService:
         self.product_repo = ProductRepository(db)
 
     async def get_cart(self, customer_id: UUID) -> Cart | None:
-        return await self.cart_repo.get_customer_cart(customer_id)
+        cart = await self.cart_repo.get_customer_cart(customer_id)
+        if cart:
+            return cart
+        cart = Cart(customer_id=customer_id)
+        await self.cart_repo.create(cart)
+        await self.db.commit()
+        return await self.cart_repo.get_customer_cart(customer_id) or cart
 
     async def add_item(self, customer_id: UUID, product_public_id: str, quantity: int) -> Cart:
         product = await self.product_repo.get_active_by_public_id(product_public_id)
@@ -43,7 +49,8 @@ class CartService:
             self.db.add(item)
             await self.db.flush()
         await self.db.commit()
-        return cart
+        refreshed = await self.cart_repo.get_customer_cart(customer_id)
+        return refreshed or cart
 
     async def update_quantity(self, customer_id: UUID, product_public_id: str, quantity: int) -> Cart:
         product = await self.product_repo.get_active_by_public_id(product_public_id)
@@ -62,7 +69,8 @@ class CartService:
             item.quantity = quantity
             await self.cart_repo.save(item)
         await self.db.commit()
-        return cart
+        refreshed = await self.cart_repo.get_customer_cart(customer_id)
+        return refreshed or cart
 
     async def remove_item(self, customer_id: UUID, product_public_id: str) -> Cart:
         return await self.update_quantity(customer_id, product_public_id, 0)

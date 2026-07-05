@@ -12,6 +12,7 @@ interface ProductInfoProps {
   price: number;
   discountPrice: number | null;
   shortDescription: string | null;
+  description: string | null;
 }
 
 export default function ProductInfo({
@@ -20,6 +21,7 @@ export default function ProductInfo({
   price,
   discountPrice,
   shortDescription,
+  description,
 }: ProductInfoProps) {
   const [quantity, setQuantity] = useState(1);
 
@@ -37,6 +39,14 @@ export default function ProductInfo({
       <p className="leading-8 text-gray-600">{shortDescription}</p>
       <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
       <AddToCartButton productPublicId={publicId} quantity={quantity} />
+      {description && (
+        <div className="border-t border-gray-200 pt-6">
+          <h2 className="text-xl font-medium">Description</h2>
+          <p className="mt-3 whitespace-pre-line leading-8 text-gray-600">
+            {description}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

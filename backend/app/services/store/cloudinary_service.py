@@ -26,7 +26,7 @@ class CloudinaryService:
                 overwrite=False,
             )
             return {
-                "url": result["url"],
+                "url": result["secure_url"],
                 "secure_url": result["secure_url"],
                 "public_id": result["public_id"],
                 "format": result["format"],

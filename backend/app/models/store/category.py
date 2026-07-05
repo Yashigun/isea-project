@@ -12,6 +12,10 @@ class Category(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     __table_args__ = {
         "schema":"store"
     }
+
+    @property
+    def image(self) -> str:
+        return getattr(self, "_image", "/placeholder.jpg")
     
     name: Mapped[str] = mapped_column(
         String(100),

@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { wishlistService } from "@/services/wishlist";
 import { useState, useEffect } from "react";
+import type { MouseEvent } from "react";
 
 interface WishlistButtonProps {
   productPublicId?: string;
@@ -23,10 +24,13 @@ export default function WishlistButton({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setActive(initialActive);
+    queueMicrotask(() => setActive(initialActive));
   }, [initialActive]);
 
-  const handleClick = async () => {
+  const handleClick = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     if (!isAuthenticated) {
       sessionStorage.setItem("returnUrl", window.location.pathname);
       router.push("/auth/signup");
@@ -42,11 +46,31 @@ export default function WishlistButton({
     try {
       let newState = active;
       if (active) {
-        await wishlistService.remove(productPublicId);
-        newState = false;
+        try {
+          await wishlistService.remove(productPublicId);
+          newState = false;
+        } catch (error: unknown) {
+          const message = error && typeof error === "object" && "response" in error
+            ? (error as { response?: { status?: number; data?: { detail?: string } } }).response?.data?.detail
+            : undefined;
+          if (message !== "Item not in wishlist") {
+            throw error;
+          }
+          newState = false;
+        }
       } else {
-        await wishlistService.add(productPublicId);
-        newState = true;
+        try {
+          await wishlistService.add(productPublicId);
+          newState = true;
+        } catch (error: unknown) {
+          const message = error && typeof error === "object" && "response" in error
+            ? (error as { response?: { status?: number; data?: { detail?: string } } }).response?.data?.detail
+            : undefined;
+          if (message !== "Product already in wishlist") {
+            throw error;
+          }
+          newState = true;
+        }
       }
       setActive(newState);
       if (onToggle) onToggle(newState);

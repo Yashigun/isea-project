@@ -31,7 +31,7 @@ export default function AdminProducts() {
   };
 
   useEffect(() => {
-    fetchData();
+    void Promise.resolve().then(fetchData);
   }, []);
 
   const handleDelete = async (publicId: string) => {
@@ -40,15 +40,26 @@ export default function AdminProducts() {
     await fetchData();
   };
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: {
+    category_public_id: string;
+    name: string;
+    slug: string;
+    price: number;
+    discount_price?: number | null;
+    short_description?: string | null;
+    description?: string | null;
+    is_active?: boolean;
+  }) => {
+    let savedProduct;
     if (editingProduct) {
-      await productService.update(editingProduct.public_id, data);
+      savedProduct = await productService.update(editingProduct.public_id, data);
     } else {
-      await productService.create(data);
+      savedProduct = await productService.create(data);
     }
     setModalOpen(false);
     setEditingProduct(null);
     await fetchData();
+    return savedProduct;
   };
 
   return (

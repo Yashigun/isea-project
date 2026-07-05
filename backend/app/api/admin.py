@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -171,7 +171,7 @@ async def get_blocked_ips(
 ):
     repo = BlockedIPRepository(db)
     if active_only:
-        items = await repo.list_active_blocks(datetime.utcnow())
+        items = await repo.list_active_blocks(datetime.now(timezone.utc))
         total = len(items)
         items = items[offset:offset+limit]
     else:
@@ -235,7 +235,7 @@ async def get_requests_by_ip(
     db: AsyncSession = Depends(get_db),
 ):
     if not since:
-        since = datetime.utcnow() - timedelta(days=1)
+        since = datetime.now(timezone.utc) - timedelta(days=1)
     repo = RequestLogRepository(db)
     stmt = (
         select(RequestLog.ip_address, func.count(RequestLog.id))
@@ -253,7 +253,7 @@ async def get_failed_logins_by_ip(
     db: AsyncSession = Depends(get_db),
 ):
     if not since:
-        since = datetime.utcnow() - timedelta(days=1)
+        since = datetime.now(timezone.utc) - timedelta(days=1)
     stmt = (
         select(LoginAttempt.ip_address, func.count(LoginAttempt.id))
         .where(LoginAttempt.successful.is_(False))

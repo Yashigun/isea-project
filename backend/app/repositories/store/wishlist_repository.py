@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.store.product import Product
 from app.models.store.wishlist_item import WishlistItem
 from app.repositories.base import BaseRepository
 
@@ -33,7 +34,10 @@ class WishlistRepository(BaseRepository[WishlistItem]):
     async def get_customer_wishlist(self, customer_id: UUID) -> list[WishlistItem]:
         stmt = (
             select(WishlistItem)
-            .options(selectinload(WishlistItem.product))
+            .options(
+                selectinload(WishlistItem.product).selectinload(Product.category),
+                selectinload(WishlistItem.product).selectinload(Product.images),
+            )
             .where(WishlistItem.customer_id == customer_id)
             .order_by(WishlistItem.created_at.desc())
         )

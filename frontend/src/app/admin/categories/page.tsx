@@ -25,7 +25,7 @@ export default function AdminCategories() {
   };
 
   useEffect(() => {
-    fetchCategories();
+    void Promise.resolve().then(fetchCategories);
   }, []);
 
   const handleDelete = async (publicId: string) => {
@@ -34,7 +34,7 @@ export default function AdminCategories() {
     await fetchCategories();
   };
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: { name: string; slug: string; description?: string; is_active?: boolean }) => {
     if (editingCategory) {
       await categoryService.update(editingCategory.public_id, data);
     } else {

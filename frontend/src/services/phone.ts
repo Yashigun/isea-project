@@ -10,12 +10,12 @@ export interface Phone {
 
 export const phoneService = {
   async getAll(): Promise<Phone[]> {
-    const response = await api.get("/phones");
+    const response = await api.get("/phones/");
     return response.data;
   },
 
   async create(data: Omit<Phone, "public_id" | "created_at" | "updated_at">): Promise<Phone> {
-    const response = await api.post("/phones", data);
+    const response = await api.post("/phones/", data);
     return response.data;
   },
 

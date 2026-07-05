@@ -22,7 +22,7 @@ export interface Order {
 export const orderService = {
   // Customer
   async list(): Promise<Order[]> {
-    const response = await api.get("/orders");
+    const response = await api.get("/orders/");
     return response.data;
   },
 
@@ -32,7 +32,7 @@ export const orderService = {
   },
 
   async create(data: { shipping_address_public_id: string; order_notes?: string }): Promise<Order> {
-    const response = await api.post("/orders", data);
+    const response = await api.post("/orders/", data);
     return response.data;
   },
 
@@ -43,12 +43,12 @@ export const orderService = {
 
   // Admin
   async listAll(status?: string): Promise<Order[]> {
-    const response = await api.get("/admin/orders", { params: { status } });
+    const response = await api.get("/admin/orders/", { params: { status } });
     return response.data;
   },
 
   async updateStatus(publicId: string, status: string): Promise<Order> {
-    const response = await api.patch(`/admin/orders/${publicId}/status`, { status });
+    const response = await api.patch(`/admin/orders/${publicId}/status`, null, { params: { status } });
     return response.data;
   },
 };

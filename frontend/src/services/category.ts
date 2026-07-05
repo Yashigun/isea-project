@@ -1,17 +1,12 @@
 import api from "@/lib/axios";
+import type { Category } from "@/types/category";
 
-export interface Category {
-  public_id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  is_active: boolean;
-}
+export type { Category };
 
 export const categoryService = {
   // Public
   async getAll(activeOnly = true): Promise<Category[]> {
-    const response = await api.get("/categories", { params: { active_only: activeOnly } });
+    const response = await api.get("/categories/", { params: { active_only: activeOnly } });
     return response.data;
   },
 
@@ -27,17 +22,17 @@ export const categoryService = {
 
   // Admin
   async create(data: { name: string; slug: string; description?: string; is_active?: boolean }): Promise<Category> {
-    const response = await api.post("/categories", data);
+    const response = await api.post("/categories/", data);
     return response.data;
   },
 
   async update(publicId: string, data: Partial<{ name: string; slug: string; description: string; is_active: boolean }>): Promise<Category> {
-    const response = await api.put(`/categories/${publicId}`, data);
+    const response = await api.put(`/categories/${publicId}/`, data);
     return response.data;
   },
 
   async delete(publicId: string): Promise<void> {
-    await api.delete(`/categories/${publicId}`);
+    await api.delete(`/categories/${publicId}/`);
   },
 };
 
