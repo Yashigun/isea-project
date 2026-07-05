@@ -22,6 +22,10 @@ from app.schemas.security import (
     RequestLogResponse,
     LoginAttemptResponse,
     AuditLogResponse,
+    RequestLogListResponse,
+    LoginAttemptListResponse,
+    AuditLogListResponse,
+    BlockedIPListResponse,
 )
 from app.services.security.security_service import SecurityService
 from app.repositories.security.request_log_repository import RequestLogRepository
@@ -33,7 +37,7 @@ from app.repositories.security.security_event_repository import SecurityEventRep
 router = APIRouter(prefix="/admin/security", tags=["admin-security"], dependencies=[Depends(get_current_admin)])
 
 # ----------------------------------------
-# Security Events (already existing)
+# Security Events
 # ----------------------------------------
 
 @router.get("/events", response_model=list[SecurityEventResponse])
@@ -63,7 +67,7 @@ async def resolve_security_event(
 # Request Logs
 # ----------------------------------------
 
-@router.get("/requests", response_model=dict)
+@router.get("/requests",response_model=RequestLogListResponse)
 async def get_request_logs(
     method: Optional[str] = Query(None),
     status_code: Optional[int] = Query(None),
@@ -94,8 +98,7 @@ async def get_request_logs(
 # ----------------------------------------
 # Login Attempts
 # ----------------------------------------
-
-@router.get("/login-attempts", response_model=dict)
+@router.get("/login-attempts",response_model=LoginAttemptListResponse)
 async def get_login_attempts(
     email: Optional[str] = Query(None),
     ip: Optional[str] = Query(None),
@@ -127,7 +130,7 @@ async def get_login_attempts(
 # Audit Logs
 # ----------------------------------------
 
-@router.get("/audit-logs", response_model=dict)
+@router.get("/audit-logs", response_model=AuditLogListResponse)
 async def get_audit_logs(
     action: Optional[str] = Query(None),
     entity_type: Optional[str] = Query(None),
@@ -156,10 +159,10 @@ async def get_audit_logs(
     }
 
 # ----------------------------------------
-# Blocked IPs (list, block, unblock)
+# Blocked IPs
 # ----------------------------------------
 
-@router.get("/blocked-ips", response_model=dict)
+@router.get("/blocked-ips", response_model=BlockedIPListResponse)
 async def get_blocked_ips(
     active_only: bool = Query(False),
     limit: int = Query(100, ge=1, le=500),
@@ -170,10 +173,8 @@ async def get_blocked_ips(
     if active_only:
         items = await repo.list_active_blocks(datetime.utcnow())
         total = len(items)
-        # Since list_active_blocks returns all, we need to paginate manually
         items = items[offset:offset+limit]
     else:
-        # We need a method to get all with pagination; we'll add a simple query
         stmt = select(BlockedIP).order_by(BlockedIP.created_at.desc()).offset(offset).limit(limit)
         result = await db.execute(stmt)
         items = result.scalars().all()
@@ -186,7 +187,7 @@ async def get_blocked_ips(
         "offset": offset,
     }
 
-@router.post("/blocked-ips")
+@router.post( "/blocked-ips", response_model=BlockedIPResponse)
 async def block_ip(
     data: BlockedIPCreateSchema,
     db: AsyncSession = Depends(get_db),
@@ -218,7 +219,7 @@ async def unblock_ip(
     return {"message": "IP unblocked"}
 
 # ----------------------------------------
-# Statistics / Dashboard
+# Statistics
 # ----------------------------------------
 
 @router.get("/dashboard/stats")

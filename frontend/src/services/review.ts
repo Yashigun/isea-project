@@ -5,7 +5,11 @@ export interface Review {
   rating: number;
   title: string;
   review: string;
-  customer: customer;
+  customer: {
+    public_id: string;
+    first_name: string;
+    last_name: string | null;
+  };
   created_at: string;
 }
 

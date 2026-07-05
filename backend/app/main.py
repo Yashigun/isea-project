@@ -14,6 +14,7 @@ from app.api import (
     wishlist_router,
     reviews_router,
     admin_router,
+    admin_orders
 )
 
 from app.middlewares.security_event import SecurityEventMiddleware
@@ -46,7 +47,8 @@ app.include_router(phones_router, prefix="/api/v1")
 app.include_router(wishlist_router, prefix="/api/v1")
 app.include_router(reviews_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
-
+app.include_router(admin_orders.router,prefix="/api/v1",)
 @app.get("/")
 async def root():
     return {"message": "Personal Store API is running"}
+

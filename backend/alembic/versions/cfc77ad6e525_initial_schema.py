@@ -1,8 +1,8 @@
 """initial schema
 
-Revision ID: d428ca4db1fe
+Revision ID: cfc77ad6e525
 Revises: 
-Create Date: 2026-07-03 20:56:30.583957
+Create Date: 2026-07-05 07:49:31.982975
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'd428ca4db1fe'
+revision: str = 'cfc77ad6e525'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,10 +32,12 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     schema='security'
     )
     op.create_index(op.f('ix_security_blocked_ips_ip_address'), 'blocked_ips', ['ip_address'], unique=True, schema='security')
+    op.create_index(op.f('ix_security_blocked_ips_public_id'), 'blocked_ips', ['public_id'], unique=True, schema='security')
     op.create_table('categories',
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('slug', sa.String(length=150), nullable=False),
@@ -53,7 +55,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_store_categories_slug'), 'categories', ['slug'], unique=True, schema='store')
     op.create_table('customers',
     sa.Column('first_name', sa.String(length=100), nullable=False),
-    sa.Column('last_name', sa.String(length=100), nullable=False),
+    sa.Column('last_name', sa.String(length=100), nullable=True),
     sa.Column('email', sa.String(length=255), nullable=False),
     sa.Column('password_hash', sa.String(length=255), nullable=True),
     sa.Column('account_status', sa.Enum('active', 'inactive', 'suspended', 'deleted', name='account_status'), nullable=False),
@@ -89,6 +91,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id'),
     schema='security'
@@ -96,6 +99,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_security_audit_logs_customer_id'), 'audit_logs', ['customer_id'], unique=False, schema='security')
     op.create_index(op.f('ix_security_audit_logs_entity_public_id'), 'audit_logs', ['entity_public_id'], unique=False, schema='security')
     op.create_index(op.f('ix_security_audit_logs_ip_address'), 'audit_logs', ['ip_address'], unique=False, schema='security')
+    op.create_index(op.f('ix_security_audit_logs_public_id'), 'audit_logs', ['public_id'], unique=True, schema='security')
     op.create_index(op.f('ix_security_audit_logs_request_id'), 'audit_logs', ['request_id'], unique=False, schema='security')
     op.create_table('customer_sessions',
     sa.Column('customer_id', sa.UUID(), nullable=False),
@@ -136,6 +140,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id'),
     schema='security'
@@ -143,6 +148,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_security_login_attempts_customer_id'), 'login_attempts', ['customer_id'], unique=False, schema='security')
     op.create_index(op.f('ix_security_login_attempts_email'), 'login_attempts', ['email'], unique=False, schema='security')
     op.create_index(op.f('ix_security_login_attempts_ip_address'), 'login_attempts', ['ip_address'], unique=False, schema='security')
+    op.create_index(op.f('ix_security_login_attempts_public_id'), 'login_attempts', ['public_id'], unique=True, schema='security')
     op.create_index(op.f('ix_security_login_attempts_request_id'), 'login_attempts', ['request_id'], unique=False, schema='security')
     op.create_table('carts',
     sa.Column('customer_id', sa.UUID(), nullable=False),
@@ -267,6 +273,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['session_id'], ['security.customer_sessions.id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id'),
@@ -274,6 +281,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_security_request_logs_customer_id'), 'request_logs', ['customer_id'], unique=False, schema='security')
     op.create_index(op.f('ix_security_request_logs_ip_address'), 'request_logs', ['ip_address'], unique=False, schema='security')
+    op.create_index(op.f('ix_security_request_logs_public_id'), 'request_logs', ['public_id'], unique=True, schema='security')
     op.create_index(op.f('ix_security_request_logs_request_id'), 'request_logs', ['request_id'], unique=True, schema='security')
     op.create_index(op.f('ix_security_request_logs_response_time_ms'), 'request_logs', ['response_time_ms'], unique=False, schema='security')
     op.create_index(op.f('ix_security_request_logs_session_id'), 'request_logs', ['session_id'], unique=False, schema='security')
@@ -294,6 +302,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column('public_id', sa.String(length=16), nullable=False),
     sa.ForeignKeyConstraint(['customer_id'], ['store.customers.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['session_id'], ['security.customer_sessions.id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id'),
@@ -301,6 +310,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_security_security_events_customer_id'), 'security_events', ['customer_id'], unique=False, schema='security')
     op.create_index(op.f('ix_security_security_events_ip_address'), 'security_events', ['ip_address'], unique=False, schema='security')
+    op.create_index(op.f('ix_security_security_events_public_id'), 'security_events', ['public_id'], unique=True, schema='security')
     op.create_index(op.f('ix_security_security_events_request_id'), 'security_events', ['request_id'], unique=False, schema='security')
     op.create_index(op.f('ix_security_security_events_resolved'), 'security_events', ['resolved'], unique=False, schema='security')
     op.create_index(op.f('ix_security_security_events_session_id'), 'security_events', ['session_id'], unique=False, schema='security')
@@ -430,6 +440,10 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.create_table('alembic_version',
+    sa.Column('version_num', sa.VARCHAR(length=32), autoincrement=False, nullable=False),
+    sa.PrimaryKeyConstraint('version_num', name=op.f('alembic_version_pkc'))
+    )
     op.drop_index(op.f('ix_store_wishlist_item_public_id'), table_name='wishlist_item', schema='store')
     op.drop_index(op.f('ix_store_wishlist_item_product_id'), table_name='wishlist_item', schema='store')
     op.drop_index(op.f('ix_store_wishlist_item_customer_id'), table_name='wishlist_item', schema='store')
@@ -457,6 +471,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_security_security_events_session_id'), table_name='security_events', schema='security')
     op.drop_index(op.f('ix_security_security_events_resolved'), table_name='security_events', schema='security')
     op.drop_index(op.f('ix_security_security_events_request_id'), table_name='security_events', schema='security')
+    op.drop_index(op.f('ix_security_security_events_public_id'), table_name='security_events', schema='security')
     op.drop_index(op.f('ix_security_security_events_ip_address'), table_name='security_events', schema='security')
     op.drop_index(op.f('ix_security_security_events_customer_id'), table_name='security_events', schema='security')
     op.drop_table('security_events', schema='security')
@@ -464,6 +479,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_security_request_logs_session_id'), table_name='request_logs', schema='security')
     op.drop_index(op.f('ix_security_request_logs_response_time_ms'), table_name='request_logs', schema='security')
     op.drop_index(op.f('ix_security_request_logs_request_id'), table_name='request_logs', schema='security')
+    op.drop_index(op.f('ix_security_request_logs_public_id'), table_name='request_logs', schema='security')
     op.drop_index(op.f('ix_security_request_logs_ip_address'), table_name='request_logs', schema='security')
     op.drop_index(op.f('ix_security_request_logs_customer_id'), table_name='request_logs', schema='security')
     op.drop_table('request_logs', schema='security')
@@ -485,6 +501,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_store_carts_customer_id'), table_name='carts', schema='store')
     op.drop_table('carts', schema='store')
     op.drop_index(op.f('ix_security_login_attempts_request_id'), table_name='login_attempts', schema='security')
+    op.drop_index(op.f('ix_security_login_attempts_public_id'), table_name='login_attempts', schema='security')
     op.drop_index(op.f('ix_security_login_attempts_ip_address'), table_name='login_attempts', schema='security')
     op.drop_index(op.f('ix_security_login_attempts_email'), table_name='login_attempts', schema='security')
     op.drop_index(op.f('ix_security_login_attempts_customer_id'), table_name='login_attempts', schema='security')
@@ -495,6 +512,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_security_customer_sessions_customer_id'), table_name='customer_sessions', schema='security')
     op.drop_table('customer_sessions', schema='security')
     op.drop_index(op.f('ix_security_audit_logs_request_id'), table_name='audit_logs', schema='security')
+    op.drop_index(op.f('ix_security_audit_logs_public_id'), table_name='audit_logs', schema='security')
     op.drop_index(op.f('ix_security_audit_logs_ip_address'), table_name='audit_logs', schema='security')
     op.drop_index(op.f('ix_security_audit_logs_entity_public_id'), table_name='audit_logs', schema='security')
     op.drop_index(op.f('ix_security_audit_logs_customer_id'), table_name='audit_logs', schema='security')
@@ -507,6 +525,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_store_categories_slug'), table_name='categories', schema='store')
     op.drop_index(op.f('ix_store_categories_public_id'), table_name='categories', schema='store')
     op.drop_table('categories', schema='store')
+    op.drop_index(op.f('ix_security_blocked_ips_public_id'), table_name='blocked_ips', schema='security')
     op.drop_index(op.f('ix_security_blocked_ips_ip_address'), table_name='blocked_ips', schema='security')
     op.drop_table('blocked_ips', schema='security')
     # ### end Alembic commands ###

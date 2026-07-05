@@ -20,6 +20,7 @@ from app.db.database import Base
 from app.models.base import (
     UUIDMixin,
     TimestampMixin,
+    PublicIdMixin
 )
 
 
@@ -61,6 +62,7 @@ class LoginAttempt(
     Base,
     UUIDMixin,
     TimestampMixin,
+    PublicIdMixin
 ):
     __tablename__ = "login_attempts"
 

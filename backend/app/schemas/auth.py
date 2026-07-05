@@ -24,8 +24,6 @@ from app.validators.password import (
 )
 
 
-
-
 class RegisterRequestSchema(BaseModel):
     """
     Customer registration request.

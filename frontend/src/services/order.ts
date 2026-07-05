@@ -9,7 +9,7 @@ export interface Order {
   shipping_cost: number;
   tax: number;
   created_at: string;
-  customer: { public_id: string; first_name: string; last_name: string; email: string };
+  customer: { public_id: string; first_name: string; last_name: string | null; email: string };
   items: Array<{
     public_id: string;
     product_name: string;

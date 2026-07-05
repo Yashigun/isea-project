@@ -71,7 +71,7 @@ export interface DashboardStats {
   total_security_events: number;
   critical_events: number;
   high_events: number;
-  blocked_ips: number;
+  active_blocked_ips: number;
   failed_logins_last_24h: number;
 }
 

@@ -16,7 +16,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
   const [name, setName] = useState(initialData?.name || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
   const [price, setPrice] = useState(initialData?.price || 0);
-  const [discountPrice, setDiscountPrice] = useState(initialData?.discount_price || "");
+  const [discountPrice, setDiscountPrice] = useState<string>(initialData?.discount_price?.toString() ?? "");
   const [shortDescription, setShortDescription] = useState(initialData?.short_description || "");
   const [description, setDescription] = useState(initialData?.description || "");
   const [isActive, setIsActive] = useState(initialData?.is_active ?? true);

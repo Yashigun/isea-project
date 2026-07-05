@@ -15,13 +15,13 @@ export interface LoginData {
 export interface User {
   public_id: string;
   first_name: string;
-  last_name: string;
+  last_name: string | null;
   email: string;
-  is_admin: boolean; 
+  is_admin: boolean;
 }
 
 export const auth = {
-  async register(data: RegisterData): Promise<User> {
+  async register(data: RegisterData): Promise<void>{
     const response = await api.post("/auth/register", data);
     return response.data;
   },

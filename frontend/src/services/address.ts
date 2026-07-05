@@ -17,12 +17,12 @@ export const addressService = {
     return response.data;
   },
 
-  async create(data: Omit<Address, "public_id" | "created_at" | "updated_at">): Promise<Address> {
+  async create(data: Omit<Address, "public_id">): Promise<Address> {
     const response = await api.post("/addresses", data);
     return response.data;
   },
 
-  async update(publicId: string, data: Partial<Omit<Address, "public_id" | "created_at" | "updated_at">>): Promise<Address> {
+  async update(publicId: string, data: Partial<Omit<Address, "public_id">>): Promise<Address> {
     const response = await api.put(`/addresses/${publicId}`, data);
     return response.data;
   },

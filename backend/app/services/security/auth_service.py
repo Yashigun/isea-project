@@ -26,7 +26,7 @@ class AuthService:
         self.session_repo = CustomerSessionRepository(db)
         self.login_attempt_repo = LoginAttemptRepository(db)
 
-    async def register(self, email: str, password: str, first_name: str, last_name: str) -> Customer:
+    async def register(self, email: str, password: str, first_name: str, last_name: Optional[str] = None) -> Customer:
         existing = await self.customer_repo.get_by_email(email)
         if existing:
             raise ValueError("Email already registered")
@@ -35,9 +35,10 @@ class AuthService:
             email=email,
             password_hash=hashed,
             first_name=first_name,
-            last_name=last_name or None,
+            last_name=last_name,
             account_status=AccountStatus.ACTIVE,
             auth_provider=AuthProvider.EMAIL,
+            is_admin=False,  # default
         )
         await self.customer_repo.create(customer)
         await self.db.commit()

@@ -6,6 +6,10 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.models.store.customer import Customer
+from app.models.store.payment import Payment
+
+
 from app.models.store.order import Order, OrderStatus
 from app.models.store.order_item import OrderItem
 from app.repositories.base import BaseRepository
@@ -104,3 +108,38 @@ class OrderRepository(BaseRepository[Order]):
         stmt = select(func.count(Order.id)).where(Order.status == status)
         result = await self.db.execute(stmt)
         return result.scalar() or 0
+    
+    
+
+    # ---------------------------------------------------------
+    # Admin
+    # ---------------------------------------------------------
+
+    async def get_all_orders(self) -> list[Order]:
+        stmt = (
+            select(Order)
+            .options(
+                selectinload(Order.customer),
+                selectinload(Order.items).selectinload(OrderItem.product),
+                selectinload(Order.payment),
+            )
+            .order_by(Order.created_at.desc())
+        )
+
+        result = await self.db.execute(stmt)
+        return list(result.scalars().all())
+
+
+    async def get_admin_order(self, public_id: str) -> Order | None:
+        stmt = (
+            select(Order)
+            .options(
+                selectinload(Order.customer),
+                selectinload(Order.items).selectinload(OrderItem.product),
+                selectinload(Order.payment),
+            )
+            .where(Order.public_id == public_id)
+        )
+
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()

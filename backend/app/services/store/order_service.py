@@ -118,3 +118,38 @@ class OrderService:
         await self.order_repo.save(order)
         await self.db.commit()
         return order
+    
+    # ---------------------------------------------------------
+    # Admin
+    # ---------------------------------------------------------
+
+    async def get_all_orders(self):
+        return await self.order_repo.get_all_orders()
+
+
+    async def get_admin_order(self, public_id: str):
+        order = await self.order_repo.get_admin_order(public_id)
+
+        if not order:
+            raise ValueError("Order not found")
+
+        return order
+
+
+    async def update_status(
+        self,
+        public_id: str,
+        status: OrderStatus,
+    ):
+        order = await self.order_repo.get_admin_order(public_id)
+
+        if not order:
+            raise ValueError("Order not found")
+
+        order.status = status
+
+        await self.order_repo.save(order)
+
+        await self.db.commit()
+
+        return order

@@ -23,6 +23,7 @@ from app.db.database import Base
 from app.models.base import (
     UUIDMixin,
     TimestampMixin,
+    PublicIdMixin
 )
 
 
@@ -67,6 +68,7 @@ class SecurityEvent(
     Base,
     UUIDMixin,
     TimestampMixin,
+    PublicIdMixin
 ):
     __tablename__ = "security_events"
 
