@@ -1,4 +1,5 @@
 import Container from "@/components/layout/Container";
+import Image from "next/image";
 
 export default function ContactPage() {
   return (
@@ -10,7 +11,9 @@ export default function ContactPage() {
 
         <Container>
 
-          <div className="max-w-3xl">
+          <div className="grid items-center gap-16 lg:grid-cols-2">
+
+            <div>
 
             <p className="mb-5 text-lg">
               Questions • <span className="text-[#ac142a]">Custom Orders</span> • Hello
@@ -30,6 +33,21 @@ export default function ContactPage() {
               Have a question about an order, a product or something you'd like
               made especially for you? Send us a message.
             </p>
+
+          </div>
+
+
+            <div className="overflow-hidden rounded-[40px]">
+
+              <Image
+                src="/images/contact.png"
+                alt="Handmade crochet products"
+                width={900}
+                height={900}
+                className="w-full object-cover"
+              />
+
+            </div>
 
           </div>
 
