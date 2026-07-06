@@ -70,37 +70,52 @@ class ProductService:
         await self.db.refresh(product)
         return product
 
-    async def update(self, public_id: str, data: ProductUpdateSchema) -> Product:
+    async def update( self, public_id: str, data: ProductUpdateSchema,) -> Product:
         product = await self.product_repo.get_by_public_id(public_id)
+
         if not product:
             raise ValueError("Product not found")
 
         if data.category_public_id:
-            category = await self.category_repo.get_active_by_public_id(data.category_public_id)
+            category = await self.category_repo.get_active_by_public_id(
+                data.category_public_id
+            )
+
             if not category:
                 raise ValueError("Category not found")
+
             product.category_id = category.id
 
         if data.name is not None:
             product.name = data.name
+
+        # Check uniqueness only when the slug is actually changing.
         if data.slug is not None:
-            if await self.product_repo.exists_by_slug(data.slug):
-                raise ValueError("Slug already exists")
-            product.slug = data.slug
+            if data.slug != product.slug:
+                if await self.product_repo.exists_by_slug(data.slug):
+                    raise ValueError("Slug already exists")
+
+                product.slug = data.slug
+
         if data.short_description is not None:
             product.short_description = data.short_description
+
         if data.description is not None:
             product.description = data.description
+
         if data.price is not None:
             product.price = data.price
+
         if data.discount_price is not None:
             product.discount_price = data.discount_price
+
         if data.is_active is not None:
             product.is_active = data.is_active
 
         await self.product_repo.save(product)
         await self.db.commit()
         await self.db.refresh(product)
+
         return product
 
     async def delete(self, public_id: str) -> None:
