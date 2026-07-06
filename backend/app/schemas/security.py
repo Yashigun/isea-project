@@ -1,27 +1,26 @@
 from datetime import datetime
 from ipaddress import IPv4Address, IPv6Address
 from typing import Optional
+from uuid import UUID
+
+from pydantic import BaseModel
 
 from app.schemas.common import BaseResponseSchema
 
-from app.models.security.request_log import HttpMethod
-from pydantic import BaseModel, ConfigDict
-
-from app.models.security.security_event import (
-    EventSeverity,
-    SecurityEventType,
-)
-from uuid import UUID
-from app.models.security.blocked_ip import BlockReason
-
-from app.models.security.login_attempt import (
-    AttemptType,
-    AuthenticationFailureReason
-)
 from app.models.security.audit_log import (
     AuditAction,
     EntityType,
 )
+
+from app.models.security.blocked_ip import (
+    BlockReason,
+)
+
+from app.models.security.login_attempt import (
+    AttemptType,
+    AuthenticationFailureReason,
+)
+
 from app.models.security.request_log import (
     HttpMethod,
     HttpProtocol,
@@ -29,7 +28,11 @@ from app.models.security.request_log import (
     RequestOutcome,
 )
 
-from ipaddress import IPv4Address, IPv6Address
+from app.models.security.security_event import (
+    EventSeverity,
+    SecurityEventType,
+)
+
 
 # -------------------------------------------------------
 # Security Events
@@ -50,8 +53,6 @@ class SecurityEventResponse(BaseResponseSchema):
 # -------------------------------------------------------
 # Request Logs
 # -------------------------------------------------------
-
-
 
 class RequestLogResponse(BaseResponseSchema):
     method: HttpMethod
@@ -78,6 +79,36 @@ class RequestLogListResponse(BaseModel):
 
 
 # -------------------------------------------------------
+# Customer Sessions
+# -------------------------------------------------------
+
+class CustomerSessionResponse(BaseResponseSchema):
+    customer_id: UUID
+
+    device_name: str | None = None
+    browser: str | None = None
+    operating_system: str | None = None
+
+    ip_address: IPv4Address | IPv6Address
+    user_agent: str
+
+    country: str | None = None
+    city: str | None = None
+
+    login_at: datetime
+    last_activity: datetime
+    expires_at: datetime
+    revoked_at: datetime | None = None
+
+
+class CustomerSessionListResponse(BaseModel):
+    items: list[CustomerSessionResponse]
+    total: int
+    limit: int
+    offset: int
+
+
+# -------------------------------------------------------
 # Login Attempts
 # -------------------------------------------------------
 
@@ -90,6 +121,7 @@ class LoginAttemptResponse(BaseResponseSchema):
     attempt_type: AttemptType
     customer_id: UUID | None = None
 
+
 class LoginAttemptListResponse(BaseModel):
     items: list[LoginAttemptResponse]
     total: int
@@ -101,8 +133,6 @@ class LoginAttemptListResponse(BaseModel):
 # Audit Logs
 # -------------------------------------------------------
 
-
-
 class AuditLogResponse(BaseResponseSchema):
     action: AuditAction
     entity_type: EntityType
@@ -113,6 +143,7 @@ class AuditLogResponse(BaseResponseSchema):
     ip_address: IPv4Address | IPv6Address
     user_agent: str
     customer_id: UUID | None = None
+
 
 class AuditLogListResponse(BaseModel):
     items: list[AuditLogResponse]

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { securityService, LoginAttempt } from "@/services/security";
 import DataTable from "@/components/admin/DataTable";
+import { Check, X } from "lucide-react";
 
 export default function LoginAttemptsTab() {
   const [attempts, setAttempts] = useState<LoginAttempt[]>([]);
@@ -67,7 +68,7 @@ export default function LoginAttemptsTab() {
             { key: "email", label: "Email" },
             { key: "attempt_type", label: "Type" },
             { key: "ip_address", label: "IP" },
-            { key: "successful", label: "Success", render: (v) => (v ? "✅" : "❌") },
+            { key: "successful", label: "Success", render: (v) => (v ? <Check className="text-green-500"/> : <X className="text-red-500"/> ) },
             { key: "failure_reason", label: "Failure Reason" },
             { key: "created_at", label: "Time", render: (v) => typeof v === "string" ? new Date(v).toLocaleString() : "" },
           ]}

@@ -3,3 +3,4 @@ from .blocked_ip_repository import BlockedIPRepository
 from .login_attempt_repository import LoginAttemptRepository
 from .request_log_repository import RequestLogRepository
 from .security_event_repository import SecurityEventRepository
+from .customer_session_repository import  CustomerSessionRepository

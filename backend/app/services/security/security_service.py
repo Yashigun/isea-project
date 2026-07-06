@@ -11,6 +11,10 @@ from app.models.security.blocked_ip import (
     BlockedIP,
 )
 
+from app.models.security.customer_session import (
+    CustomerSession,
+)
+
 from app.models.security.login_attempt import (
     AuthenticationFailureReason,
     AttemptType,
@@ -25,6 +29,10 @@ from app.models.security.security_event import (
 
 from app.repositories.security.blocked_ip_repository import (
     BlockedIPRepository,
+)
+
+from app.repositories.security.customer_session_repository import (
+    CustomerSessionRepository,
 )
 
 from app.repositories.security.login_attempt_repository import (
@@ -57,6 +65,70 @@ class SecurityService:
 
         self.blocked_ip_repo = BlockedIPRepository(db)
 
+        self.session_repo = CustomerSessionRepository(db)
+
+    # ---------------------------------------------------------
+    # Customer Sessions
+    # ---------------------------------------------------------
+
+    async def list_customer_sessions(
+        self,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> tuple[list[CustomerSession], int]:
+
+        return await self.session_repo.list_all_sessions(
+            limit=limit,
+            offset=offset,
+        )
+
+    async def get_customer_session(
+        self,
+        public_id: str,
+    ) -> CustomerSession:
+
+        session = await self.session_repo.get_by_public_id(
+            public_id
+        )
+
+        if session is None:
+            raise ValueError(
+                "Customer session not found."
+            )
+
+        return session
+
+    async def revoke_customer_session(
+        self,
+        public_id: str,
+    ) -> CustomerSession:
+
+        session = await self.session_repo.get_by_public_id(
+            public_id
+        )
+
+        if session is None:
+            raise ValueError(
+                "Customer session not found."
+            )
+
+        if session.revoked_at is None:
+            await self.session_repo.deactivate(
+                session
+            )
+
+            await self.db.commit()
+
+            await self.db.refresh(session)
+
+        return session
+
+    async def count_active_sessions(
+        self,
+    ) -> int:
+
+        return await self.session_repo.count_active_sessions()
+
     # ---------------------------------------------------------
     # Login Attempts
     # ---------------------------------------------------------
@@ -85,14 +157,12 @@ class SecurityService:
         )
 
         await self.login_attempt_repo.create(
-            attempt,
+            attempt
         )
 
         await self.db.commit()
 
-        await self.db.refresh(
-            attempt,
-        )
+        await self.db.refresh(attempt)
 
         return attempt
 
@@ -109,7 +179,7 @@ class SecurityService:
     ) -> list[SecurityEvent]:
 
         events = await self.event_repo.get_recent(
-            limit + offset,
+            limit + offset
         )
 
         if severity is not None:
@@ -134,7 +204,7 @@ class SecurityService:
     ) -> Optional[SecurityEvent]:
 
         return await self.event_repo.get_by_public_id(
-            public_id,
+            public_id
         )
 
     async def create_event(
@@ -163,9 +233,7 @@ class SecurityService:
             resolved=False,
         )
 
-        await self.event_repo.create(
-            event,
-        )
+        await self.event_repo.create(event)
 
         await self.db.commit()
 
@@ -177,7 +245,7 @@ class SecurityService:
     ) -> SecurityEvent:
 
         event = await self.event_repo.get_by_public_id(
-            public_id,
+            public_id
         )
 
         if event is None:
@@ -187,9 +255,7 @@ class SecurityService:
 
         event.resolved = True
 
-        await self.event_repo.save(
-            event,
-        )
+        await self.event_repo.save(event)
 
         await self.db.commit()
 
@@ -247,9 +313,7 @@ class SecurityService:
                     )
                 )
 
-            await self.blocked_ip_repo.save(
-                existing,
-            )
+            await self.blocked_ip_repo.save(existing)
 
             await self.db.commit()
 
@@ -272,9 +336,7 @@ class SecurityService:
             is_active=True,
         )
 
-        await self.blocked_ip_repo.create(
-            blocked,
-        )
+        await self.blocked_ip_repo.create(blocked)
 
         await self.db.commit()
 
@@ -298,9 +360,7 @@ class SecurityService:
 
         blocked.is_active = False
 
-        await self.blocked_ip_repo.save(
-            blocked,
-        )
+        await self.blocked_ip_repo.save(blocked)
 
         await self.db.commit()
 
@@ -308,10 +368,8 @@ class SecurityService:
         self,
     ) -> list[BlockedIP]:
 
-        return (
-            await self.blocked_ip_repo.list_active_blocks(
-                datetime.now(timezone.utc)
-            )
+        return await self.blocked_ip_repo.list_active_blocks(
+            datetime.now(timezone.utc)
         )
 
     # ---------------------------------------------------------
@@ -366,6 +424,10 @@ class SecurityService:
             )
         )
 
+        active_sessions = (
+            await self.session_repo.count_active_sessions()
+        )
+
         top_ips = await self._get_top_ips()
 
         return {
@@ -376,6 +438,7 @@ class SecurityService:
             "high_events": high_events,
             "failed_logins_last_24h": failed_logins_last_24h,
             "blocked_ips": blocked_ips,
+            "active_sessions": active_sessions,
             "top_ips": top_ips,
         }
 
@@ -388,10 +451,8 @@ class SecurityService:
         limit: int = 10,
     ) -> list[dict]:
 
-        rows = (
-            await self.request_log_repo.get_top_ips(
-                limit
-            )
+        rows = await self.request_log_repo.get_top_ips(
+            limit
         )
 
         return [

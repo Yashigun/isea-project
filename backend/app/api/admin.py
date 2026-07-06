@@ -26,6 +26,8 @@ from app.schemas.security import (
     LoginAttemptListResponse,
     AuditLogListResponse,
     BlockedIPListResponse,
+    CustomerSessionListResponse,
+    CustomerSessionResponse,
 )
 from app.services.security.security_service import SecurityService
 from app.repositories.security.request_log_repository import RequestLogRepository
@@ -98,6 +100,7 @@ async def get_request_logs(
 # ----------------------------------------
 # Login Attempts
 # ----------------------------------------
+
 @router.get("/login-attempts",response_model=LoginAttemptListResponse)
 async def get_login_attempts(
     email: Optional[str] = Query(None),
@@ -125,6 +128,84 @@ async def get_login_attempts(
         "limit": limit,
         "offset": offset,
     }
+
+# ----------------------------------------
+# Customer Sessions
+# ----------------------------------------
+
+@router.get(
+    "/sessions",
+    response_model=CustomerSessionListResponse,
+)
+async def list_customer_sessions(
+    limit: int = Query(
+        default=100,
+        ge=1,
+        le=500,
+    ),
+    offset: int = Query(
+        default=0,
+        ge=0,
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    service = SecurityService(db)
+
+    sessions, total = await service.list_customer_sessions(
+        limit=limit,
+        offset=offset,
+    )
+
+    return CustomerSessionListResponse(
+        items=sessions,
+        total=total,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get(
+    "/sessions/{public_id}",
+    response_model=CustomerSessionResponse,
+)
+async def get_customer_session(
+    public_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    service = SecurityService(db)
+
+    try:
+        return await service.get_customer_session(
+            public_id
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
+
+
+@router.post(
+    "/sessions/{public_id}/revoke",
+    response_model=CustomerSessionResponse,
+)
+async def revoke_customer_session(
+    public_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    service = SecurityService(db)
+
+    try:
+        return await service.revoke_customer_session(
+            public_id
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )
 
 # ----------------------------------------
 # Audit Logs

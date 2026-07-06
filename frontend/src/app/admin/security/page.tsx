@@ -8,6 +8,7 @@ import LoginAttemptsTab from "@/components/admin/security/LoginAttemptTab";
 import AuditLogsTab from "@/components/admin/security/AuditLogTab";
 import BlockedIPTab from "@/components/admin/security/BlockedIPTab";
 import StatsTab from "@/components/admin/security/StatsTab";
+import CustomerSessionTab from "@/components/admin/security/CustomerSessionTab";
 
 export default function AdminSecurityPage() {
   const searchParams = useSearchParams();
@@ -17,13 +18,34 @@ export default function AdminSecurityPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Security</h1>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList>
           <TabsTrigger value="requests">Request Logs</TabsTrigger>
-          <TabsTrigger value="login-attempts">Login Attempts</TabsTrigger>
-          <TabsTrigger value="audit-logs">Audit Logs</TabsTrigger>
-          <TabsTrigger value="blocked-ips">Blocked IPs</TabsTrigger>
-          <TabsTrigger value="stats">Stats</TabsTrigger>
+
+          <TabsTrigger value="login-attempts">
+            Login Attempts
+          </TabsTrigger>
+
+          <TabsTrigger value="sessions">
+            Sessions
+          </TabsTrigger>
+
+          <TabsTrigger value="audit-logs">
+            Audit Logs
+          </TabsTrigger>
+
+          <TabsTrigger value="blocked-ips">
+            Blocked IPs
+          </TabsTrigger>
+
+          <TabsTrigger value="stats">
+            Stats
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="requests">
@@ -32,6 +54,10 @@ export default function AdminSecurityPage() {
 
         <TabsContent value="login-attempts">
           <LoginAttemptsTab />
+        </TabsContent>
+
+        <TabsContent value="sessions">
+          <CustomerSessionTab />
         </TabsContent>
 
         <TabsContent value="audit-logs">

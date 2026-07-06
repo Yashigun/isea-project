@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 from uuid import UUID
 
@@ -60,7 +60,9 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
 
         stmt = (
             select(CustomerSession)
-            .where(CustomerSession.id == session_id)
+            .where(
+                CustomerSession.id == session_id
+            )
         )
 
         result = await self.db.execute(stmt)
@@ -74,7 +76,9 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
 
         stmt = (
             select(CustomerSession)
-            .where(CustomerSession.public_id == public_id)
+            .where(
+                CustomerSession.public_id == public_id
+            )
         )
 
         result = await self.db.execute(stmt)
@@ -98,29 +102,46 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
 
         return result.scalar_one_or_none()
 
-    async def get_active_session(
+    # ---------------------------------------------------------
+    # Admin Session Listing
+    # ---------------------------------------------------------
+
+    async def list_all_sessions(
         self,
-        customer_id: UUID,
-        session_token: str,
-    ) -> Optional[CustomerSession]:
+        limit: int = 100,
+        offset: int = 0,
+    ) -> tuple[list[CustomerSession], int]:
+
+        count_stmt = select(
+            func.count(CustomerSession.id)
+        )
+
+        count_result = await self.db.execute(
+            count_stmt
+        )
+
+        total = count_result.scalar() or 0
 
         stmt = (
             select(CustomerSession)
-            .where(
-                CustomerSession.customer_id == customer_id
+            .order_by(
+                CustomerSession.created_at.desc()
             )
-            .where(
-                CustomerSession.session_token
-                == session_token
-            )
-            .where(
-                CustomerSession.is_active.is_(True)
-            )
+            .limit(limit)
+            .offset(offset)
         )
 
         result = await self.db.execute(stmt)
 
-        return result.scalar_one_or_none()
+        sessions = list(
+            result.scalars().all()
+        )
+
+        return sessions, total
+
+    # ---------------------------------------------------------
+    # Customer Sessions
+    # ---------------------------------------------------------
 
     async def list_customer_sessions(
         self,
@@ -130,7 +151,8 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
         stmt = (
             select(CustomerSession)
             .where(
-                CustomerSession.customer_id == customer_id
+                CustomerSession.customer_id
+                == customer_id
             )
             .order_by(
                 CustomerSession.created_at.desc()
@@ -146,13 +168,19 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
         customer_id: UUID,
     ) -> list[CustomerSession]:
 
+        now = datetime.now(timezone.utc)
+
         stmt = (
             select(CustomerSession)
             .where(
-                CustomerSession.customer_id == customer_id
+                CustomerSession.customer_id
+                == customer_id
             )
             .where(
-                CustomerSession.is_active.is_(True)
+                CustomerSession.revoked_at.is_(None)
+            )
+            .where(
+                CustomerSession.expires_at > now
             )
             .order_by(
                 CustomerSession.created_at.desc()
@@ -163,24 +191,64 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
 
         return list(result.scalars().all())
 
+    async def get_active_session(
+        self,
+        customer_id: UUID,
+        public_id: str,
+    ) -> Optional[CustomerSession]:
+
+        now = datetime.now(timezone.utc)
+
+        stmt = (
+            select(CustomerSession)
+            .where(
+                CustomerSession.customer_id
+                == customer_id
+            )
+            .where(
+                CustomerSession.public_id
+                == public_id
+            )
+            .where(
+                CustomerSession.revoked_at.is_(None)
+            )
+            .where(
+                CustomerSession.expires_at > now
+            )
+        )
+
+        result = await self.db.execute(stmt)
+
+        return result.scalar_one_or_none()
+
     # ---------------------------------------------------------
     # Statistics
     # ---------------------------------------------------------
 
     async def count_active_sessions(
         self,
-        customer_id: UUID,
+        customer_id: UUID | None = None,
     ) -> int:
 
+        now = datetime.now(timezone.utc)
+
         stmt = (
-            select(func.count(CustomerSession.id))
-            .where(
-                CustomerSession.customer_id == customer_id
+            select(
+                func.count(CustomerSession.id)
             )
             .where(
-                CustomerSession.is_active.is_(True)
+                CustomerSession.revoked_at.is_(None)
+            )
+            .where(
+                CustomerSession.expires_at > now
             )
         )
+
+        if customer_id is not None:
+            stmt = stmt.where(
+                CustomerSession.customer_id
+                == customer_id
+            )
 
         result = await self.db.execute(stmt)
 
@@ -195,7 +263,9 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
         session: CustomerSession,
     ) -> CustomerSession:
 
-        session.is_active = False
+        session.revoked_at = datetime.now(
+            timezone.utc
+        )
 
         await self.db.flush()
 
@@ -210,8 +280,10 @@ class CustomerSessionRepository(BaseRepository[CustomerSession]):
             customer_id
         )
 
+        revoked_at = datetime.now(timezone.utc)
+
         for session in sessions:
-            session.is_active = False
+            session.revoked_at = revoked_at
 
         await self.db.flush()
 

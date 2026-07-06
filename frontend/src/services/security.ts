@@ -1,5 +1,35 @@
 import api from "@/lib/axios";
 
+export interface CustomerSession {
+  public_id: string;
+  customer_id: string;
+
+  device_name: string | null;
+  browser: string | null;
+  operating_system: string | null;
+
+  ip_address: string;
+  user_agent: string;
+
+  country: string | null;
+  city: string | null;
+
+  login_at: string;
+  last_activity: string;
+  expires_at: string;
+  revoked_at: string | null;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CustomerSessionListResponse {
+  items: CustomerSession[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
 export interface SecurityEvent {
   public_id: string;
   event_type: string;
@@ -76,86 +106,249 @@ export interface DashboardStats {
 }
 
 export const securityService = {
-  // Existing methods
+  // ---------------------------------------------------------
+  // Dashboard
+  // ---------------------------------------------------------
+
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await api.get("/admin/security/dashboard/stats");
+    const response = await api.get(
+      "/admin/security/dashboard/stats"
+    );
+
     return response.data;
   },
 
-  async listEvents(params?: { severity?: string; resolved?: boolean; limit?: number }): Promise<SecurityEvent[]> {
-    const response = await api.get("/admin/security/events", { params });
-    return response.data;
-  },
+  // ---------------------------------------------------------
+  // Security Events
+  // ---------------------------------------------------------
 
-  async resolveEvent(publicId: string): Promise<void> {
-    await api.post(`/admin/security/events/${publicId}/resolve`);
-  },
-
-  // New methods
-  async getRequestLogs(params: {
-    method?: string;
-    status_code?: number;
-    ip?: string;
-    start_date?: string;
-    end_date?: string;
+  async listEvents(params?: {
+    severity?: string;
+    resolved?: boolean;
     limit?: number;
-    offset?: number;
-  } = {}): Promise<{ items: RequestLog[]; total: number }> {
-    const response = await api.get("/admin/security/requests", { params });
+  }): Promise<SecurityEvent[]> {
+    const response = await api.get(
+      "/admin/security/events",
+      {
+        params,
+      }
+    );
+
     return response.data;
   },
 
-  async getLoginAttempts(params: {
-    email?: string;
-    ip?: string;
-    successful?: boolean;
-    start_date?: string;
-    end_date?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{ items: LoginAttempt[]; total: number }> {
-    const response = await api.get("/admin/security/login-attempts", { params });
+  async resolveEvent(
+    publicId: string
+  ): Promise<void> {
+    await api.post(
+      `/admin/security/events/${publicId}/resolve`
+    );
+  },
+
+  // ---------------------------------------------------------
+  // Customer Sessions
+  // ---------------------------------------------------------
+
+  async getCustomerSessions(
+    params: {
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<CustomerSessionListResponse> {
+    const response = await api.get(
+      "/admin/security/sessions",
+      {
+        params,
+      }
+    );
+
     return response.data;
   },
 
-  async getAuditLogs(params: {
-    action?: string;
-    entity_type?: string;
-    customer_id?: string;
-    start_date?: string;
-    end_date?: string;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{ items: AuditLog[]; total: number }> {
-    const response = await api.get("/admin/security/audit-logs", { params });
+  async revokeCustomerSession(
+    publicId: string
+  ): Promise<CustomerSession> {
+    const response = await api.post(
+      `/admin/security/sessions/${publicId}/revoke`
+    );
+
     return response.data;
   },
 
-  async getBlockedIPs(params: {
-    active_only?: boolean;
-    limit?: number;
-    offset?: number;
-  } = {}): Promise<{ items: BlockedIP[]; total: number }> {
-    const response = await api.get("/admin/security/blocked-ips", { params });
+  // ---------------------------------------------------------
+  // Request Logs
+  // ---------------------------------------------------------
+
+  async getRequestLogs(
+    params: {
+      method?: string;
+      status_code?: number;
+      ip?: string;
+      start_date?: string;
+      end_date?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<{
+    items: RequestLog[];
+    total: number;
+  }> {
+    const response = await api.get(
+      "/admin/security/requests",
+      {
+        params,
+      }
+    );
+
     return response.data;
   },
 
-  async blockIp(data: { ip_address: string; reason: string; note?: string; expires_in_minutes?: number; permanently?: boolean }): Promise<{ public_id: string }> {
-    const response = await api.post("/admin/security/blocked-ips", data);
+  // ---------------------------------------------------------
+  // Login Attempts
+  // ---------------------------------------------------------
+
+  async getLoginAttempts(
+    params: {
+      email?: string;
+      ip?: string;
+      successful?: boolean;
+      start_date?: string;
+      end_date?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<{
+    items: LoginAttempt[];
+    total: number;
+  }> {
+    const response = await api.get(
+      "/admin/security/login-attempts",
+      {
+        params,
+      }
+    );
+
     return response.data;
   },
 
-  async unblockIp(publicId: string): Promise<void> {
-    await api.delete(`/admin/security/blocked-ips/${publicId}`);
-  },
+  // ---------------------------------------------------------
+  // Audit Logs
+  // ---------------------------------------------------------
 
-  async getTopIPsByRequests(since?: string): Promise<{ ip: string; count: number }[]> {
-    const response = await api.get("/admin/security/stats/requests-by-ip", { params: { since } });
+  async getAuditLogs(
+    params: {
+      action?: string;
+      entity_type?: string;
+      customer_id?: string;
+      start_date?: string;
+      end_date?: string;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<{
+    items: AuditLog[];
+    total: number;
+  }> {
+    const response = await api.get(
+      "/admin/security/audit-logs",
+      {
+        params,
+      }
+    );
+
     return response.data;
   },
 
-  async getTopIPsByFailedLogins(since?: string): Promise<{ ip: string; count: number }[]> {
-    const response = await api.get("/admin/security/stats/failed-logins-by-ip", { params: { since } });
+  // ---------------------------------------------------------
+  // Blocked IPs
+  // ---------------------------------------------------------
+
+  async getBlockedIPs(
+    params: {
+      active_only?: boolean;
+      limit?: number;
+      offset?: number;
+    } = {}
+  ): Promise<{
+    items: BlockedIP[];
+    total: number;
+  }> {
+    const response = await api.get(
+      "/admin/security/blocked-ips",
+      {
+        params,
+      }
+    );
+
+    return response.data;
+  },
+
+  async blockIp(data: {
+    ip_address: string;
+    reason: string;
+    note?: string;
+    expires_in_minutes?: number;
+    permanently?: boolean;
+  }): Promise<{
+    public_id: string;
+  }> {
+    const response = await api.post(
+      "/admin/security/blocked-ips",
+      data
+    );
+
+    return response.data;
+  },
+
+  async unblockIp(
+    publicId: string
+  ): Promise<void> {
+    await api.delete(
+      `/admin/security/blocked-ips/${publicId}`
+    );
+  },
+
+  // ---------------------------------------------------------
+  // Statistics
+  // ---------------------------------------------------------
+
+  async getTopIPsByRequests(
+    since?: string
+  ): Promise<
+    {
+      ip: string;
+      count: number;
+    }[]
+  > {
+    const response = await api.get(
+      "/admin/security/stats/requests-by-ip",
+      {
+        params: {
+          since,
+        },
+      }
+    );
+
+    return response.data;
+  },
+
+  async getTopIPsByFailedLogins(
+    since?: string
+  ): Promise<
+    {
+      ip: string;
+      count: number;
+    }[]
+  > {
+    const response = await api.get(
+      "/admin/security/stats/failed-logins-by-ip",
+      {
+        params: {
+          since,
+        },
+      }
+    );
+
     return response.data;
   },
 };
