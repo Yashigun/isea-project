@@ -4,79 +4,78 @@ import Container from "./layout/Container";
 
 export default function Hero() {
   return (
-    <section className="pb-20 pt-10">
+    <section className="relative overflow-hidden pb-20 pt-10">
 
-      <Container>
+      {/* Background Hero Image */}
+      <Image
+        src="/images/hero.png"
+        alt="Hero"
+        fill
+        priority
+        className="object-cover"
+      />
 
-        <div className="grid items-center gap-16 lg:grid-cols-2">
+      {/* Content */}
+      <div className="relative z-10">
 
-          {/* Left */}
+        <Container>
 
-          <div>
+          <div className="grid items-center gap-16 lg:grid-cols-2">
 
-            <p className="mb-4 text-lg">
-              Handmade • Cute • Minimal
-            </p>
+            {/* Left */}
 
-            <h1 className="text-6xl font-light leading-tight">
+            <div>
 
-              Made with love,
+              <p className="mb-4 text-lg">
+                Handmade • <span className="text-[#657ab1]">Cute</span> • Minimal
+              </p>
 
-              <br />
+              <h1 className="text-6xl font-light leading-tight">
 
-              crafted for
+                Made with <span className="text-[#ac142a]">Love</span>,
 
-              <br />
+                <br />
 
-              everyday joy.
+                <span className="text-[#8da86c]">crafted</span> for
 
-            </h1>
+                <br />
 
-            <p className="mt-8 max-w-lg text-lg text-gray-600">
+                everyday <span className="text-[#031d8c]">joy</span>.
 
-              Discover handcrafted products designed to
-              bring warmth, charm and personality to your
-              everyday life.
+              </h1>
 
-            </p>
+              <p className="mt-8 max-w-lg text-lg text-gray-600">
 
-            <button
-              className="
-                mt-10
-                rounded-full
-                border
-                border-black
-                px-8
-                py-3
-                transition
-                duration-300
-                hover:bg-black
-                hover:text-white
-              "
-            >
-              Shop Collection
-            </button>
+                Discover handcrafted products designed to
+                bring warmth, charm and personality to your
+                everyday life.
+
+              </p>
+
+              <button
+                className="
+                  mt-10
+                  rounded-full
+                  border
+                  border-black
+                  px-8
+                  py-3
+                  transition
+                  duration-300
+                  hover:bg-black
+                  hover:text-white
+                "
+              >
+                Shop Collection
+              </button>
+
+            </div>
 
           </div>
 
-          {/* Right */}
+        </Container>
 
-          <div className="overflow-hidden rounded-[40px]">
-
-            <Image
-              src="/images/hero.jpg"
-              alt="Hero"
-              width={900}
-              height={900}
-              priority
-              className="aspect-square w-full object-cover"
-            />
-
-          </div>
-
-        </div>
-
-      </Container>
+      </div>
 
     </section>
   );

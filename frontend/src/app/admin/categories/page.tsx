@@ -1,5 +1,5 @@
 "use client";
-
+import { Check , X} from "lucide-react";
 import { useEffect, useState } from "react";
 import { categoryService, Category } from "@/services/category";
 import DataTable from "@/components/admin/DataTable";
@@ -67,7 +67,7 @@ export default function AdminCategories() {
           columns={[
             { key: "name", label: "Name" },
             { key: "slug", label: "Slug" },
-            { key: "is_active", label: "Active", render: (val) => (val ? "✅" : "❌") },
+            { key: "is_active", label: "Active", render: (val) => (val ? <Check className="text-green-500" /> : <X className="text-red-500" />) },
           ]}
           data={categories}
           onEdit={(cat) => {

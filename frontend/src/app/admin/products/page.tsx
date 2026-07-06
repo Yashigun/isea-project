@@ -1,5 +1,5 @@
 "use client";
-
+import { Check , X} from "lucide-react";
 import { useEffect, useState } from "react";
 import { productService, Product } from "@/services/product";
 import { categoryService, Category } from "@/services/category";
@@ -84,7 +84,7 @@ export default function AdminProducts() {
           columns={[
             { key: "name", label: "Name" },
             { key: "price", label: "Price" },
-            { key: "is_active", label: "Active", render: (val) => (val ? "✅" : "❌") },
+            { key: "is_active", label: "Active", render: (val) => (val ? <Check className="text-green-500" /> : <X className="text-red-500" />) },
           ]}
           data={products}
           onEdit={(p) => {

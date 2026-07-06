@@ -28,7 +28,7 @@ export default function Footer() {
 
             </div>
 
-            <p className="text-sm text-muted-foreground">
+            <p className="ml-9 text-sm text-muted-foreground">
               Handmade with love.
             </p>
 
@@ -65,7 +65,7 @@ export default function Footer() {
             </h4>
 
             <p className="text-sm text-muted-foreground">
-              hello@example.com
+              shopvimsical@gmail.com
             </p>
 
           </div>

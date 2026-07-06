@@ -47,12 +47,13 @@ export default function CollectionCard({
 
       <div className="mt-5 flex items-center justify-between">
 
-        <h3 className="text-2xl font-medium">
+        <h3 className="ml-4 mb-3 text-2xl font-medium">
           {category.name}
         </h3>
 
         <span
           className="
+            mr-4 mb-3
             text-sm
             transition-transform
             duration-300

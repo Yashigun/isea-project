@@ -25,22 +25,21 @@ export default async function HomePage() {
       <Section>
         <Container>
           <SectionHeading
-            title="Our Products"
-            subtitle="Handcrafted pieces you'll love."
-          />
-
-          <ProductGrid products={products} />
-        </Container>
-      </Section>
-
-      <Section>
-        <Container>
-          <SectionHeading
             title="Shop by Collection"
             subtitle="Browse our carefully curated collections."
           />
 
           <CollectionGrid categories={categories} />
+        </Container>
+      </Section>
+      <Section>
+        <Container>
+          <SectionHeading
+            title="Our Products"
+            subtitle="Handcrafted pieces you'll love."
+          />
+
+          <ProductGrid products={products} />
         </Container>
       </Section>
 
