@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta, UTC, timezone
-from typing import Any, Dict, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.security.blocked_ip import (
@@ -12,7 +11,11 @@ from app.models.security.blocked_ip import (
     BlockedIP,
 )
 
-from app.models.security.request_log import RequestLog
+from app.models.security.login_attempt import (
+    AuthenticationFailureReason,
+    AttemptType,
+    LoginAttempt,
+)
 
 from app.models.security.security_event import (
     EventSeverity,
@@ -53,6 +56,45 @@ class SecurityService:
         self.login_attempt_repo = LoginAttemptRepository(db)
 
         self.blocked_ip_repo = BlockedIPRepository(db)
+
+    # ---------------------------------------------------------
+    # Login Attempts
+    # ---------------------------------------------------------
+
+    async def record_login_attempt(
+        self,
+        *,
+        email: str,
+        ip_address: str,
+        user_agent: str,
+        successful: bool,
+        customer_id: UUID | None = None,
+        failure_reason: AuthenticationFailureReason | None = None,
+        request_id: str | None = None,
+    ) -> LoginAttempt:
+
+        attempt = LoginAttempt(
+            customer_id=customer_id,
+            attempt_type=AttemptType.LOGIN,
+            email=email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            successful=successful,
+            failure_reason=failure_reason,
+            request_id=request_id,
+        )
+
+        await self.login_attempt_repo.create(
+            attempt,
+        )
+
+        await self.db.commit()
+
+        await self.db.refresh(
+            attempt,
+        )
+
+        return attempt
 
     # ---------------------------------------------------------
     # Security Events
@@ -121,7 +163,9 @@ class SecurityService:
             resolved=False,
         )
 
-        await self.event_repo.create(event)
+        await self.event_repo.create(
+            event,
+        )
 
         await self.db.commit()
 
@@ -143,7 +187,9 @@ class SecurityService:
 
         event.resolved = True
 
-        await self.event_repo.save(event)
+        await self.event_repo.save(
+            event,
+        )
 
         await self.db.commit()
 
@@ -177,13 +223,17 @@ class SecurityService:
         if existing:
 
             existing.is_active = True
+
             existing.reason = reason
+
             existing.blocked_by = blocked_by
+
             existing.block_note = note
 
             if permanently:
 
                 existing.permanently_blocked = True
+
                 existing.blocked_until = None
 
             else:
@@ -229,7 +279,7 @@ class SecurityService:
         await self.db.commit()
 
         return blocked
-    
+
     async def unblock_ip(
         self,
         public_id: str,
@@ -328,7 +378,6 @@ class SecurityService:
             "blocked_ips": blocked_ips,
             "top_ips": top_ips,
         }
-        
 
     # ---------------------------------------------------------
     # Helpers
@@ -383,4 +432,3 @@ async def create_security_event_async(
             request_id=request_id,
             evidence=evidence,
         )
-        
