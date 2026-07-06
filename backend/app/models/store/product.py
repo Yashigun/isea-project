@@ -18,6 +18,7 @@ from app.db.database import Base
 from app.models.base import TimestampMixin, UUIDMixin, PublicIdMixin
 
 
+
 class Product(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     __tablename__ = "products"
 
@@ -91,6 +92,7 @@ class Product(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     )
     wishlist_items: Mapped[list["WishlistItem"]] = relationship(
         back_populates="product",
+        passive_deletes=True,
     )
     cart_items: Mapped[list["CartItem"]] = relationship(
         back_populates="product",
@@ -100,8 +102,9 @@ class Product(Base, UUIDMixin, TimestampMixin, PublicIdMixin):
     )
     reviews: Mapped[list["ProductReview"]] = relationship(
         back_populates="product",
+        passive_deletes="all",
     )
-    
+        
     @hybrid_property
     def primary_image(self) -> str | None:
         if self.images:
