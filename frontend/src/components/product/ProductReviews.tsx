@@ -138,13 +138,6 @@ export default function ProductReviews({ productPublicId }: ProductReviewsProps)
           className="mt-2 w-full rounded-lg border px-3 py-2"
         />
 
-        <label className="mt-4 block text-sm font-medium">Age</label>
-        <input
-          value={age}
-          onChange={(event) => setAge(event.target.value)}
-          className="mt-2 w-full rounded-lg border px-3 py-2"
-        />
-
         <label className="mt-4 block text-sm font-medium">Review</label>
         <textarea
           value={review}

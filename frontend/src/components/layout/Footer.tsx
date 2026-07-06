@@ -46,8 +46,8 @@ export default function Footer() {
                 Home
               </Link>
 
-              <Link href="/products">
-                Shop
+              <Link href="/about">
+                About
               </Link>
 
               <Link href="/contact">
