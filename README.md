@@ -1,24 +1,65 @@
+<div align="center">
+
 # Vimsy
+  <img src="public/images/hero.png" alt="Storefront Screenshot" width="800">
+</div>
 
-Vimsy is a full-stack e-commerce application with a Next.js storefront and a FastAPI backend. It includes customer authentication, product browsing, cart and wishlist flows, checkout-related data models, reviews, and an admin area for catalog, orders, and security visibility.
+### Vimsy is a full-stack security aware e-commerce application with a Next.js storefront and a FastAPI backend. It includes customer authentication, product browsing, cart and wishlist flows, checkout-related data models, reviews, and an admin area for catalog, orders, and security visibility.
 
-## Stack
-
-- Frontend: Next.js 16, TypeScript, Tailwind CSS 4
-- Backend: FastAPI, SQLAlchemy async, Alembic
-- Database: PostgreSQL 16
-- Media: Cloudinary for product image uploads
-- Auth: JWT access/refresh tokens with cookie support
+---
 
 ## Features
 
-- Customer signup, login, logout, session refresh, and password change
-- Product catalog with categories, collections, and product detail pages
-- Cart and wishlist APIs and frontend flows
-- Customer profile pages for account, addresses, and phone numbers
-- Product reviews
-- Admin pages for products, categories, orders, and security monitoring
-- Security-related persistence for login attempts, blocked IPs, audit logs, request logs, and customer sessions
+### E-Commerce Functionality
+
+* Customer account management with signup, login, logout, access-token refresh, and secure password changes
+* Product catalog with category and collection organization, product listings, and detailed product pages
+* Persistent shopping cart with product quantity management and customer-specific cart data
+* Customer wishlist for saving and managing products
+* Customer profile dashboard with account information, saved addresses, and phone number management
+* Product review system for authenticated customers
+* Order management and order tracking workflows
+
+### Administration
+
+* Administrative dashboard for managing store operations
+* Product creation, modification, deletion, and image management
+* Category and collection management
+* Customer order management and order status updates
+* Security monitoring interface for reviewing application activity and security-related data
+
+### Authentication and Application Security
+
+* Secure customer authentication and session management
+* Short-lived access tokens with refresh-token-based session renewal
+* Server-side customer session tracking and session revocation
+* Secure password hashing and password change workflows
+* Role-based authorization for protected administrative functionality
+* API input validation and protected customer-specific resources
+
+### Security Monitoring and Digital Forensics
+
+* HTTP request logging with request metadata, response status, and performance information
+* Authentication attempt tracking for successful and failed login activity
+* Customer session monitoring and activity tracking
+* Blocked IP persistence and management
+* Audit logging infrastructure for recording security-sensitive and business-critical actions
+* Security event persistence for detected suspicious activity
+* Request correlation and security telemetry designed to support incident investigation and forensic analysis
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | Next.js 16, React 19, TypeScript, Tailwind CSS 4 (HTTPS) |
+| **Backend** | FastAPI, SQLAlchemy async, Alembic |
+| **Database** | PostgreSQL 16 |
+| **Media** | Cloudinary |
+| **Authbtication** |  Argon2, JWT |
+
+---
 
 ## Repository Layout
 
@@ -67,11 +108,7 @@ POSTGRES_DB=<db name>
 
 ### 2. Configure the backend
 
-```intall backend requirments
-pip install -r requirements.txt
-```
-
-The backend loads settings from `backend/.env` or the current working directory `.env`, depending on how you run it. At minimum, the code expects values for:
+The backend loads settings from `backend/.env`:
 
 ```env
 APP_NAME=Personal <store name>
@@ -114,19 +151,18 @@ GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URI=
 ```
 
-Install Python dependencies in your preferred environment, then run the API server from the `backend` directory:
+### 3. Start the backend
+
+From `backend/`:
 
 ```bash
+pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://localhost:8000`, with:
+Backend runs at `http://localhost:8000`.
 
-- `GET /` for a basic status message
-- `GET /health` for a health check
-- `GET /docs` for Swagger UI
-
-### 3. Run database migrations
+### 4. Run database migrations
 
 From `backend/`:
 
