@@ -60,9 +60,9 @@ docker compose up -d
 This uses values from the root `.env` file:
 
 ```env
-POSTGRES_USER=store_admin
-POSTGRES_PASSWORD=mnzx!1092
-POSTGRES_DB=ecommerce
+POSTGRES_USER=<db user>
+POSTGRES_PASSWORD=<password>
+POSTGRES_DB=<db name>
 ```
 
 ### 2. Configure the backend
