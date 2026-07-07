@@ -75,7 +75,7 @@ APP_VERSION=1.0.0
 ENVIRONMENT=development
 DEBUG=true
 
-DATABASE_URL=postgresql+asyncpg://store_admin:mnzx!1092@127.0.0.1:5432/ecommerce
+DATABASE_URL=<db connection string>
 
 JWT_ACCESS_SECRET_KEY=change-me
 JWT_REFRESH_SECRET_KEY=change-me-too
@@ -89,7 +89,7 @@ COOKIE_SECURE=false
 COOKIE_HTTPONLY=true
 COOKIE_SAMESITE=lax
 
-ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+ALLOWED_ORIGINS=http://localhost:3000    #NextJS default port
 LOG_LEVEL=INFO
 
 MAX_LOGIN_ATTEMPTS=5
