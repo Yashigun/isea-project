@@ -1,10 +1,10 @@
-# Personal Store
+# Vimsy
 
-Personal Store is a full-stack e-commerce application with a Next.js storefront and a FastAPI backend. It includes customer authentication, product browsing, cart and wishlist flows, checkout-related data models, reviews, and an admin area for catalog, orders, and security visibility.
+Vimsy is a full-stack e-commerce application with a Next.js storefront and a FastAPI backend. It includes customer authentication, product browsing, cart and wishlist flows, checkout-related data models, reviews, and an admin area for catalog, orders, and security visibility.
 
 ## Stack
 
-- Frontend: Next.js 16, React 19, TypeScript, Tailwind CSS 4
+- Frontend: Next.js 16, TypeScript, Tailwind CSS 4
 - Backend: FastAPI, SQLAlchemy async, Alembic
 - Database: PostgreSQL 16
 - Media: Cloudinary for product image uploads
@@ -147,21 +147,6 @@ By default, frontend requests are routed to:
 NEXT_PUBLIC_API_URL=http://127.0.0.1:8000/api/v1
 ```
 
-## Testing
-
-Backend tests currently live under [`backend/tests`](/home/yashi/isea/personal-store/backend/tests) and can be run from `backend/` with your Python test runner of choice, for example:
-
-```bash
-python -m unittest discover -s tests
-```
-
-The frontend currently exposes these scripts:
-
-```bash
-npm run lint
-npm run build
-```
-
 ## Notable API Areas
 
 - `/api/v1/auth`
@@ -175,8 +160,4 @@ npm run build
 - `/api/v1/reviews`
 - `/api/v1/admin`
 
-## Notes
 
-- `docker-compose.yml` only starts PostgreSQL. The frontend and backend are run separately during development.
-- Product image uploads are wired through Cloudinary, so admin product management may require Cloudinary credentials for full functionality.
-- The repository currently does not include a Python dependency manifest such as `requirements.txt` or `pyproject.toml`. If you plan to onboard other developers, adding one would make backend setup much smoother.
