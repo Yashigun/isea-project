@@ -67,6 +67,10 @@ POSTGRES_DB=<db name>
 
 ### 2. Configure the backend
 
+```intall backend requirments
+pip install -r requirements.txt
+```
+
 The backend loads settings from `backend/.env` or the current working directory `.env`, depending on how you run it. At minimum, the code expects values for:
 
 ```env
