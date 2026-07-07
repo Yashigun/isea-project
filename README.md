@@ -70,7 +70,7 @@ POSTGRES_DB=<db name>
 The backend loads settings from `backend/.env` or the current working directory `.env`, depending on how you run it. At minimum, the code expects values for:
 
 ```env
-APP_NAME=Personal Store API
+APP_NAME=Personal <store name>
 APP_VERSION=1.0.0
 ENVIRONMENT=development
 DEBUG=true
@@ -85,7 +85,7 @@ JWT_AUDIENCE=personal-store-users
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
 
-COOKIE_SECURE=false
+COOKIE_SECURE=false  #change it is true for deployment
 COOKIE_HTTPONLY=true
 COOKIE_SAMESITE=lax
 
@@ -116,7 +116,7 @@ Install Python dependencies in your preferred environment, then run the API serv
 uvicorn app.main:app --reload
 ```
 
-The API will be available at `http://127.0.0.1:8000`, with:
+The API will be available at `http://localhost:8000`, with:
 
 - `GET /` for a basic status message
 - `GET /health` for a health check
