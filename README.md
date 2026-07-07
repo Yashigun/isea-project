@@ -1,7 +1,7 @@
 <div align="center">
 
 # Vimsy
-  <img src="frontend/public/images/hero.png" alt="Storefront Screenshot" width="800">
+  <img src="frontend/public/images/vimsy.png" alt="vimsy" width="800">
 </div>
 
 ### Vimsy is a full-stack security aware e-commerce application with a Next.js storefront and a FastAPI backend. It includes customer authentication, product browsing, cart and wishlist flows, checkout-related data models, reviews, and an admin area for catalog, orders, and security visibility.
