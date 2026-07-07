@@ -6,16 +6,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.database import get_db
 
 # Services
-from app.services.auth_service import AuthService
-from app.services.product_service import ProductService
-from app.services.category_service import CategoryService
-from app.services.cart_service import CartService
-from app.services.order_service import OrderService
-from app.services.address_service import AddressService
-from app.services.phone_service import PhoneService
-from app.services.wishlist_service import WishlistService
-from app.services.review_service import ReviewService
-from app.services.security_service import SecurityService
+from app.services.security.auth_service import AuthService
+from app.services.store.product_service import ProductService
+from app.services.store.category_service import CategoryService
+from app.services.store.cart_service import CartService
+from app.services.store.order_service import OrderService
+from app.services.store.address_service import AddressService
+from app.services.store.phone_service import PhoneService
+from app.services.store.wishlist_service import WishlistService
+from app.services.store.review_service import ReviewService
+from app.services.security.security_service import SecurityService
 
 # Async dependencies
 async def get_auth_service(
