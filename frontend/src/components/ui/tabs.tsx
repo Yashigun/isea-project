@@ -34,7 +34,13 @@ export function TabsList({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={`flex gap-2 border-b border-gray-200 ${className}`}>{children}</div>;
+  return (
+    <div
+      className={`flex gap-2 overflow-x-auto border-b border-gray-200 ${className}`}
+    >
+      {children}
+    </div>
+  );
 }
 
 export function TabsTrigger({
@@ -54,7 +60,7 @@ export function TabsTrigger({
   return (
     <button
       onClick={() => context.setActiveTab(value)}
-      className={`px-4 py-2 text-sm font-medium transition-colors ${
+      className={`shrink-0 whitespace-nowrap px-4 py-2 text-sm font-medium transition-colors ${
         isActive
           ? "border-b-2 border-black text-black"
           : "text-gray-500 hover:text-black"

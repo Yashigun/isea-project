@@ -9,12 +9,15 @@ interface ShopReviewsProps {
 export default function ShopReviews({ reviews }: ShopReviewsProps) {
   return (
     <div>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-5 lg:space-y-6">
         {reviews.length === 0 ? (
-          <p className="text-gray-500">No reviews yet.</p>
+          <p className="text-sm text-gray-500 sm:text-base">No reviews yet.</p>
         ) : (
           reviews.slice(0, 5).map((item) => (
-            <article key={item.public_id} className="border-b pb-5">
+            <article
+              key={item.public_id}
+              className="border-b pb-4 sm:pb-5"
+            >
               <div className="flex items-center gap-1 text-amber-500">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <Star
@@ -24,9 +27,16 @@ export default function ShopReviews({ reviews }: ShopReviewsProps) {
                   />
                 ))}
               </div>
-              <h3 className="mt-2 font-medium">{item.title}</h3>
-              <p className="mt-2 leading-7 text-gray-600">{item.review}</p>
-              <p className="mt-2 text-sm text-gray-400">
+
+              <h3 className="mt-2 text-sm font-medium sm:text-base">
+                {item.title}
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-gray-600 sm:text-base sm:leading-7">
+                {item.review}
+              </p>
+
+              <p className="mt-2 text-xs text-gray-400 sm:text-sm">
                 {item.customer.first_name} {item.customer.last_name ?? ""}
                 {item.age ? `, ${item.age}` : ""}
               </p>
@@ -35,9 +45,13 @@ export default function ShopReviews({ reviews }: ShopReviewsProps) {
         )}
       </div>
 
-      <Link href="/review" className="mt-6 inline-block text-sm font-medium">
+      <Link
+        href="/review"
+        className="mt-5 inline-block text-sm font-medium sm:mt-6"
+      >
         Review -&gt;
       </Link>
     </div>
   );
 }
+

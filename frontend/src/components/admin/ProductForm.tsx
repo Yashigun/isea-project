@@ -114,8 +114,8 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto">
-      <h2 className="text-xl font-semibold">{initialData ? "Edit Product" : "New Product"}</h2>
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4 max-h-[70vh] overflow-y-auto">
+      <h2 className="text-lg font-semibold sm:text-xl">{initialData ? "Edit Product" : "New Product"}</h2>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg whitespace-pre-wrap text-sm">
@@ -129,7 +129,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
           value={categoryPublicId}
           onChange={(e) => setCategoryPublicId(e.target.value)}
           required
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
         >
           <option value="">Select category</option>
           {categories.map((cat) => (
@@ -153,7 +153,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
             }
           }}
           required
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
         />
       </div>
 
@@ -162,7 +162,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
         <input
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
           placeholder="Auto-generated from name"
         />
         <p className="text-xs text-gray-500 mt-1">Leave empty to auto-generate</p>
@@ -177,7 +177,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
           value={price}
           onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
           required
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
         />
         <p className="text-xs text-gray-500 mt-1">Must be greater than 0</p>
       </div>
@@ -190,7 +190,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
           min="0"
           value={discountPrice}
           onChange={(e) => setDiscountPrice(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
           placeholder="Leave empty for no discount"
         />
         <p className="text-xs text-gray-500 mt-1">Must be greater than 0 or leave empty</p>
@@ -201,7 +201,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
         <textarea
           value={shortDescription}
           onChange={(e) => setShortDescription(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
           rows={2}
         />
       </div>
@@ -211,7 +211,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
           rows={4}
         />
       </div>
@@ -223,7 +223,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
           accept="image/*"
           multiple
           onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
-          className="mt-1"
+          className="mt-1 max-w-full text-sm sm:text-base"
         />
         <p className="text-xs text-gray-500 mt-1">Max size: 10MB each. Formats: JPEG, PNG, WEBP, GIF</p>
       </div>
@@ -241,7 +241,7 @@ export default function ProductForm({ categories, initialData, onSubmit }: Produ
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-black text-white py-2 rounded-lg disabled:opacity-50"
+        className="w-full bg-black text-white py-2 rounded-lg disabled:opacity-50 text-sm sm:text-base"
       >
         {loading ? "Saving..." : initialData ? "Update" : "Create"}
       </button>

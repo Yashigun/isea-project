@@ -19,12 +19,12 @@ export default function QuantitySelector({
           quantity > 1 &&
           setQuantity(quantity - 1)
         }
-        className="px-5 py-3"
+        className="px-4 py-2.5 sm:px-5 sm:py-3"
       >
         <Minus size={18} />
       </button>
 
-      <span className="min-w-12 text-center">
+      <span className="min-w-10 text-center sm:min-w-12">
         {quantity}
       </span>
 
@@ -32,7 +32,7 @@ export default function QuantitySelector({
         onClick={() =>
           setQuantity(quantity + 1)
         }
-        className="px-5 py-3"
+        className="px-4 py-2.5 sm:px-5 sm:py-3"
       >
         <Plus size={18} />
       </button>

@@ -26,15 +26,15 @@ export default function CategoryForm({ initialData, onSubmit }: CategoryFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-xl font-semibold">{initialData ? "Edit Category" : "New Category"}</h2>
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+      <h2 className="text-lg font-semibold sm:text-xl">{initialData ? "Edit Category" : "New Category"}</h2>
       <div>
         <label className="block text-sm font-medium">Name</label>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
         />
       </div>
       <div>
@@ -43,7 +43,7 @@ export default function CategoryForm({ initialData, onSubmit }: CategoryFormProp
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
           required
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
         />
       </div>
       <div>
@@ -51,7 +51,7 @@ export default function CategoryForm({ initialData, onSubmit }: CategoryFormProp
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full border rounded-lg px-3 py-2 mt-1"
+          className="w-full border rounded-lg px-3 py-2 mt-1 text-sm sm:text-base"
           rows={3}
         />
       </div>
@@ -67,7 +67,7 @@ export default function CategoryForm({ initialData, onSubmit }: CategoryFormProp
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-black text-white py-2 rounded-lg disabled:opacity-50"
+        className="w-full bg-black text-white py-2 rounded-lg disabled:opacity-50 text-sm sm:text-base"
       >
         {loading ? "Saving..." : initialData ? "Update" : "Create"}
       </button>

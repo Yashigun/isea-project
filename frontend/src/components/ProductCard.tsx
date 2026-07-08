@@ -1,3 +1,4 @@
+
 import { Product } from "@/types/product";
 import AddToCartButton from "./common/AddToCartButton";
 import ProductPrice from "./common/ProductPrice";
@@ -19,12 +20,16 @@ export default function ProductCard({ product }: ProductCardProps) {
     <article
       className="
         group
-        rounded-[36px]
-        p-4
+        rounded-[24px]
+        p-2
         transition-all
         duration-300
         hover:-translate-y-2
         hover:shadow-[0_25px_45px_rgba(220,38,38,0.18)]
+        sm:rounded-[30px]
+        sm:p-3
+        lg:rounded-[36px]
+        lg:p-4
       "
     >
       <ProductImage
@@ -34,10 +39,12 @@ export default function ProductCard({ product }: ProductCardProps) {
         href={`/products/${product.slug}`}
       />
 
-      <div className="mt-5 space-y-5">
+      <div className="mt-3 space-y-3 sm:mt-4 sm:space-y-4 lg:mt-5 lg:space-y-5">
         <Link href={`/products/${product.slug}`} className="block">
           <div>
-            <h3 className="text-2xl font-medium">{product.name}</h3>
+            <h3 className="text-lg font-medium sm:text-xl lg:text-2xl">
+              {product.name}
+            </h3>
             <ProductPrice
               price={product.price}
               discountPrice={product.discount_price ?? undefined}
@@ -50,3 +57,4 @@ export default function ProductCard({ product }: ProductCardProps) {
     </article>
   );
 }
+

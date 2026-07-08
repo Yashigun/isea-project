@@ -31,14 +31,14 @@ export default function DataTable<T extends { public_id: string }>({
             {columns.map((col) => (
               <th
                 key={String(col.key)}
-                className="px-6 py-3 text-left text-sm font-medium text-gray-500"
+                className="px-3 py-2 text-left text-xs font-medium text-gray-500 sm:px-6 sm:py-3 sm:text-sm"
               >
                 {col.label}
               </th>
             ))}
 
             {(onEdit || onDelete) && (
-              <th className="px-6 py-3 text-right">
+              <th className="px-3 py-2 text-right text-xs sm:px-6 sm:py-3 sm:text-sm">
                 Actions
               </th>
             )}
@@ -54,7 +54,7 @@ export default function DataTable<T extends { public_id: string }>({
               {columns.map((col) => (
                 <td
                   key={String(col.key)}
-                  className="px-6 py-4"
+                  className="px-3 py-3 text-sm sm:px-6 sm:py-4 sm:text-base"
                 >
                   {col.render
                     ? col.render(row[col.key], row)
@@ -63,7 +63,7 @@ export default function DataTable<T extends { public_id: string }>({
               ))}
 
               {(onEdit || onDelete) && (
-                <td className="space-x-2 px-6 py-4 text-right">
+                <td className="space-x-2 px-3 py-3 text-right sm:px-6 sm:py-4">
                   {onEdit && (
                     <button
                       onClick={() => onEdit(row)}

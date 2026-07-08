@@ -10,7 +10,7 @@ export default function ProductLayout({
   info,
 }: ProductLayoutProps) {
   return (
-    <div className="grid gap-16 lg:grid-cols-2">
+    <div className="grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-16">
 
       <div>
         {gallery}

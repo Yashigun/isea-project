@@ -10,8 +10,8 @@ export default function RelatedProducts({
   products,
 }: RelatedProductsProps) {
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-medium">
+    <div className="space-y-6 sm:space-y-8">
+      <h2 className="text-2xl font-medium sm:text-3xl">
         You may also like
       </h2>
 

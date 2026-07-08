@@ -18,7 +18,7 @@ export default function ProductPrice({
 
   if (!discountPrice) {
     return (
-      <p className="text-lg font-semibold">
+      <p className="text-base font-semibold sm:text-lg">
         {formattedPrice}
       </p>
     );
@@ -32,13 +32,13 @@ export default function ProductPrice({
     }).format(discountPrice);
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
 
-      <span className="text-lg font-semibold">
+      <span className="text-base font-semibold sm:text-lg">
         {formattedDiscount}
       </span>
 
-      <span className="text-gray-400 line-through">
+      <span className="text-sm text-gray-400 line-through sm:text-base">
         {formattedPrice}
       </span>
 

@@ -55,7 +55,7 @@ export default function AddToCartButton({
       type="button"
       onClick={handleClick}
       disabled={loading}
-      className="flex w-full items-center justify-center gap-2 rounded-full border border-black py-3 transition-all duration-300 hover:bg-black hover:text-white disabled:opacity-50"
+      className="flex w-full items-center justify-center gap-1.5 rounded-full border border-black py-2.5 text-sm transition-all duration-300 hover:bg-black hover:text-white disabled:opacity-50 sm:gap-2 sm:py-3 sm:text-base"
     >
       <ShoppingBag size={18} />
       {loading ? "Adding..." : added ? "Added to Cart" : "Add to Cart"}

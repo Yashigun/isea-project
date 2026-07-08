@@ -1,8 +1,15 @@
+
 "use client";
 
 import Link from "next/link";
 import Image from "next/image";
-import { Search, ShoppingBag, UserRound, X } from "lucide-react";
+import {
+  Search,
+  ShoppingBag,
+  UserRound,
+  X,
+  Menu,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,6 +23,7 @@ export default function Navbar() {
 
   const [cartCount, setCartCount] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [searching, setSearching] = useState(false);
@@ -113,11 +121,11 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 bg-[#fffaf6/70] backdrop-blur-md">
 
-        <div className="relative flex h-32 items-center justify-between px-8 lg:px-16 xl:px-24">
+        <div className="relative flex h-24 items-center justify-between px-4 sm:h-28 sm:px-8 lg:h-32 lg:px-16 xl:px-24">
 
           {/* Left Navigation */}
 
-          <nav className="flex items-center gap-10">
+          <nav className="hidden items-center gap-10 lg:flex">
 
             <Link
               href="/"
@@ -145,7 +153,7 @@ export default function Navbar() {
 
           {/* Logo */}
 
-          <div className="absolute left-1/2 -translate-x-1/2">
+          <div className="absolute left-4 sm:left-8 lg:left-1/2 lg:-translate-x-1/2">
 
             <Link
               href="/"
@@ -158,7 +166,7 @@ export default function Navbar() {
                 width={200}
                 height={110}
                 priority
-                className="h-auto w-[190px] lg:w-[230px]"
+                className="h-auto w-[150px] sm:w-[180px] lg:w-[230px]"
                 style={{ height: "auto" }}
               />
 
@@ -169,7 +177,7 @@ export default function Navbar() {
 
           {/* Right Icons */}
 
-          <div className="flex items-center gap-7">
+          <div className="hidden items-center gap-7 lg:flex">
 
             <button
               aria-label="Search"
@@ -205,7 +213,132 @@ export default function Navbar() {
 
           </div>
 
+
+          {/* Mobile / Tablet Hamburger */}
+
+          <div className="ml-auto flex items-center lg:hidden">
+
+            <button
+              type="button"
+              aria-label={
+                mobileMenuOpen
+                  ? "Close navigation menu"
+                  : "Open navigation menu"
+              }
+              aria-expanded={mobileMenuOpen}
+              onClick={() =>
+                setMobileMenuOpen((current) => !current)
+              }
+              className="p-2 transition hover:text-[#ac142a] transition-colors duration-300 ease-in-out"
+            >
+
+              {mobileMenuOpen ? (
+                <X size={26} />
+              ) : (
+                <Menu size={26} />
+              )}
+
+            </button>
+
+          </div>
+
         </div>
+
+
+        {/* Mobile / Tablet Navigation */}
+
+        {mobileMenuOpen && (
+
+          <div className="border-t border-black/10 px-4 pb-6 sm:px-8 lg:hidden">
+
+            <nav className="flex flex-col">
+
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="border-b border-black/10 py-4 text-lg font-medium transition hover:text-[#ac142a] transition-colors duration-300 ease-in-out"
+              >
+                Shop
+              </Link>
+
+              <Link
+                href="/about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="border-b border-black/10 py-4 text-lg font-medium transition hover:text-[#ac142a] transition-colors duration-300 ease-in-out"
+              >
+                About
+              </Link>
+
+              <Link
+                href="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="border-b border-black/10 py-4 text-lg font-medium transition hover:text-[#ac142a] transition-colors duration-300 ease-in-out"
+              >
+                Contact
+              </Link>
+
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setSearchOpen(true);
+                }}
+                className="flex items-center gap-3 border-b border-black/10 py-4 text-left text-lg font-medium transition hover:text-[#ac142a] transition-colors duration-300 ease-in-out"
+              >
+
+                <Search size={21} />
+
+                Search
+
+              </button>
+
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleProfileClick();
+                }}
+                className="flex items-center gap-3 border-b border-black/10 py-4 text-left text-lg font-medium transition hover:text-[#ac142a] transition-colors duration-300 ease-in-out"
+              >
+
+                <UserRound size={21} />
+
+                Account
+
+              </button>
+
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleCartClick();
+                }}
+                className="flex items-center justify-between py-4 text-left text-lg font-medium transition hover:text-[#ac142a] transition-colors duration-300 ease-in-out"
+              >
+
+                <span className="flex items-center gap-3">
+
+                  <ShoppingBag size={21} />
+
+                  Cart
+
+                </span>
+
+
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-[10px] text-white">
+                  {cartCount}
+                </span>
+
+              </button>
+
+            </nav>
+
+          </div>
+
+        )}
 
       </header>
 
@@ -385,3 +518,4 @@ export default function Navbar() {
     </>
   );
 }
+

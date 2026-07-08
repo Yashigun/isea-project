@@ -32,26 +32,26 @@ export default function RequestLogsTab() {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-4">
         <input
           placeholder="Method (GET, POST, ...)"
           value={filters.method}
           onChange={(e) => setFilters({ ...filters, method: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         />
         <input
           placeholder="Status Code"
           value={filters.status_code}
           onChange={(e) => setFilters({ ...filters, status_code: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         />
         <input
           placeholder="IP Address"
           value={filters.ip}
           onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         />
-        <button onClick={fetchData} className="bg-black text-white px-4 py-2 rounded">
+        <button onClick={fetchData} className="w-full sm:w-auto bg-black text-white px-4 py-2 rounded">
           Filter
         </button>
       </div>

@@ -33,7 +33,7 @@ export default function BlockedIPTab() {
 
   return (
     <div>
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
         <label className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -42,7 +42,7 @@ export default function BlockedIPTab() {
           />
           Active only
         </label>
-        <button onClick={fetchData} className="bg-black text-white px-4 py-2 rounded">
+        <button onClick={fetchData} className="w-full sm:w-auto bg-black text-white px-4 py-2 rounded">
           Refresh
         </button>
       </div>

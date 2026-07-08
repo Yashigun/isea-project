@@ -39,7 +39,7 @@ export default function ProductImage({
   );
 
   return (
-    <div className="group relative overflow-hidden rounded-[32px]">
+    <div className="group relative overflow-hidden rounded-[24px] sm:rounded-[28px] lg:rounded-[32px]">
       {href ? <Link href={href}>{imageElement}</Link> : imageElement}
 
       {productPublicId && (
@@ -57,3 +57,4 @@ function normalizeImage(image: string | null | undefined) {
   if (image.startsWith("//")) return `https:${image}`;
   return image.replace("http://res.cloudinary.com", "https://res.cloudinary.com");
 }
+

@@ -19,14 +19,16 @@ export default function CollectionCard({
         group
         block
         overflow-hidden
-        rounded-[28px]
+        rounded-[20px]
+        sm:rounded-[24px]
+        lg:rounded-[28px]
         transition-all
         duration-300
         hover:-translate-y-2
         hover:shadow-[0_20px_45px_rgba(220,38,38,0.16)]
       "
     >
-      <div className="overflow-hidden rounded-[28px]">
+      <div className="overflow-hidden rounded-[20px] sm:rounded-[24px] lg:rounded-[28px]">
 
         <Image
           src={imageSrc}
@@ -45,16 +47,20 @@ export default function CollectionCard({
 
       </div>
 
-      <div className="mt-5 flex items-center justify-between">
+      <div className="mt-3 flex items-center justify-between sm:mt-4 lg:mt-5">
 
-        <h3 className="ml-4 mb-3 text-2xl font-medium">
+        <h3 className="ml-2 mb-2 text-lg font-medium sm:ml-3 sm:mb-3 sm:text-xl lg:ml-4 lg:text-2xl">
           {category.name}
         </h3>
 
         <span
           className="
-            mr-4 mb-3
-            text-sm
+            mr-2 mb-2
+            text-xs
+            sm:mr-3
+            sm:mb-3
+            sm:text-sm
+            lg:mr-4
             transition-transform
             duration-300
             group-hover:translate-x-1

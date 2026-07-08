@@ -76,17 +76,17 @@ export default function ProductReviews({ productPublicId }: ProductReviewsProps)
   };
 
   return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_420px]">
+    <div className="grid gap-8 sm:gap-10 lg:grid-cols-[1fr_420px]">
       <div>
-        <h2 className="text-3xl font-medium">Customer Reviews</h2>
-        <div className="mt-6 space-y-4">
+        <h2 className="text-2xl font-medium sm:text-3xl">Customer Reviews</h2>
+        <div className="mt-5 space-y-4 sm:mt-6">
           {reviews.length === 0 ? (
-            <p className="rounded-lg bg-gray-50 p-6 text-gray-500">
+            <p className="rounded-lg bg-gray-50 p-4 text-gray-500 sm:p-6">
               No reviews yet.
             </p>
           ) : (
             reviews.map((item) => (
-              <article key={item.public_id} className="rounded-lg border bg-white p-5">
+              <article key={item.public_id} className="rounded-lg border bg-white p-4 sm:p-5">
                 <div className="flex items-center gap-1 text-amber-500">
                   {[1, 2, 3, 4, 5].map((value) => (
                     <Star
@@ -97,8 +97,8 @@ export default function ProductReviews({ productPublicId }: ProductReviewsProps)
                   ))}
                 </div>
                 <h3 className="mt-3 font-semibold">{item.title}</h3>
-                <p className="mt-2 leading-7 text-gray-600">{item.review}</p>
-                <p className="mt-3 text-sm text-gray-400">
+                <p className="mt-2 break-words leading-7 text-gray-600">{item.review}</p>
+                <p className="mt-3 break-words text-sm text-gray-400">
                   {item.customer.first_name} {item.customer.last_name ?? ""}
                   {item.age ? `, ${item.age}` : ""}
                 </p>
@@ -108,9 +108,9 @@ export default function ProductReviews({ productPublicId }: ProductReviewsProps)
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-6">
-        <h3 className="text-xl font-medium">Write a Review</h3>
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      <form onSubmit={handleSubmit} className="rounded-lg border bg-white p-4 sm:p-6">
+        <h3 className="text-lg font-medium sm:text-xl">Write a Review</h3>
+        {error && <p className="mt-3 break-words text-sm text-red-600">{error}</p>}
 
         <p className="mt-5 text-sm font-medium">Rating</p>
         <div className="mt-2 flex items-center gap-1">
@@ -156,7 +156,7 @@ export default function ProductReviews({ productPublicId }: ProductReviewsProps)
           accept="image/*"
           multiple
           onChange={(event) => setImages(Array.from(event.target.files ?? []).slice(0, 2))}
-          className="mt-2 w-full text-sm"
+          className="mt-2 w-full max-w-full text-sm"
         />
         <p className="mt-1 text-xs text-gray-500">{images.length}/2 selected</p>
 

@@ -31,20 +31,20 @@ export default function AuditLogsTab() {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-4">
         <input
           placeholder="Action (create, update, delete, ...)"
           value={filters.action}
           onChange={(e) => setFilters({ ...filters, action: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         />
         <input
           placeholder="Entity Type (product, category, order, ...)"
           value={filters.entity_type}
           onChange={(e) => setFilters({ ...filters, entity_type: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         />
-        <button onClick={fetchData} className="bg-black text-white px-4 py-2 rounded">
+        <button onClick={fetchData} className="w-full sm:w-auto bg-black text-white px-4 py-2 rounded">
           Filter
         </button>
       </div>

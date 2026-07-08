@@ -41,13 +41,13 @@ export default function PhoneForm({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl p-6 max-w-md w-full">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4">
+      <div className="bg-white rounded-xl p-4 sm:p-6 max-w-md w-full">
+        <div className="flex justify-between items-center gap-3 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold">
             {initialData ? "Edit Phone Number" : "Add Phone Number"}
           </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 shrink-0">
             <X size={24} />
           </button>
         </div>

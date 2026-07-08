@@ -178,11 +178,11 @@ export default function CustomerSessionTab() {
 
     <div>
 
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
 
         <button
           onClick={fetchData}
-          className="bg-black text-white px-4 py-2 rounded"
+          className="w-full sm:w-auto bg-black text-white px-4 py-2 rounded"
         >
           Refresh
         </button>

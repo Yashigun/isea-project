@@ -26,23 +26,23 @@ export default function ProductInfo({
   const [quantity, setQuantity] = useState(1);
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-5xl font-medium">{name}</h1>
-          <div className="mt-4">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-medium sm:text-4xl lg:text-5xl">{name}</h1>
+          <div className="mt-3 sm:mt-4">
             <ProductPrice price={price} discountPrice={discountPrice ?? undefined} />
           </div>
         </div>
         <WishlistButton productPublicId={publicId} />
       </div>
-      <p className="leading-8 text-gray-600">{shortDescription}</p>
+      <p className="leading-7 text-gray-600 sm:leading-8">{shortDescription}</p>
       <QuantitySelector quantity={quantity} setQuantity={setQuantity} />
       <AddToCartButton productPublicId={publicId} quantity={quantity} />
       {description && (
-        <div className="border-t border-gray-200 pt-6">
-          <h2 className="text-xl font-medium">Description</h2>
-          <p className="mt-3 whitespace-pre-line leading-8 text-gray-600">
+        <div className="border-t border-gray-200 pt-5 sm:pt-6">
+          <h2 className="text-lg font-medium sm:text-xl">Description</h2>
+          <p className="mt-3 whitespace-pre-line leading-7 text-gray-600 sm:leading-8">
             {description}
           </p>
         </div>

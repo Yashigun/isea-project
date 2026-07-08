@@ -87,7 +87,7 @@ export default function WishlistButton({
       onClick={handleClick}
       disabled={loading}
       aria-label="Wishlist"
-      className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:scale-110 disabled:opacity-50"
+      className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 hover:scale-110 disabled:opacity-50 sm:right-4 sm:top-4 sm:h-11 sm:w-11"
     >
       <Heart
         size={20}

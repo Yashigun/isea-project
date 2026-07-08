@@ -33,29 +33,29 @@ export default function LoginAttemptsTab() {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-4">
         <input
           placeholder="Email"
           value={filters.email}
           onChange={(e) => setFilters({ ...filters, email: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         />
         <input
           placeholder="IP Address"
           value={filters.ip}
           onChange={(e) => setFilters({ ...filters, ip: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         />
         <select
           value={filters.successful}
           onChange={(e) => setFilters({ ...filters, successful: e.target.value })}
-          className="border rounded px-3 py-2"
+          className="w-full sm:w-auto border rounded px-3 py-2"
         >
           <option value="">All</option>
           <option value="true">Successful</option>
           <option value="false">Failed</option>
         </select>
-        <button onClick={fetchData} className="bg-black text-white px-4 py-2 rounded">
+        <button onClick={fetchData} className="w-full sm:w-auto bg-black text-white px-4 py-2 rounded">
           Filter
         </button>
       </div>

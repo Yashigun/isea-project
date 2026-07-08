@@ -53,13 +53,13 @@ export default function AccountTab({
   };
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">Account Settings</h1>
+    <div className="space-y-6 sm:space-y-8">
+      <h1 className="text-2xl font-bold sm:text-3xl">Account Settings</h1>
 
       {/* Personal Info */}
-      <section className="bg-white rounded-xl shadow-sm border p-6">
-        <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
-        <div className="space-y-2">
+      <section className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
+        <h2 className="text-lg font-semibold mb-4 sm:text-xl">Personal Information</h2>
+        <div className="space-y-2 break-words">
           <p>
             <span className="font-medium">Name:</span> {user.first_name}{" "}
             {user.last_name}
@@ -71,15 +71,15 @@ export default function AccountTab({
       </section>
 
       {/* Addresses */}
-      <section className="bg-white rounded-xl shadow-sm border p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Addresses</h2>
+      <section className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
+        <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:justify-between sm:items-center">
+          <h2 className="text-lg font-semibold sm:text-xl">Addresses</h2>
           <button
             onClick={() => {
               setEditingAddress(null);
               setShowAddressForm(true);
             }}
-            className="text-sm bg-black text-white px-4 py-2 rounded-lg"
+            className="text-sm bg-black text-white px-4 py-2 rounded-lg w-full sm:w-auto"
           >
             Add Address
           </button>
@@ -91,9 +91,9 @@ export default function AccountTab({
             {addresses.map((addr) => (
               <div
                 key={addr.public_id}
-                className="border rounded-lg p-4 flex justify-between items-start"
+                className="border rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start"
               >
-                <div>
+                <div className="min-w-0 break-words">
                   <p className="font-medium">
                     {addr.address_line_1}
                     {addr.address_line_2 && `, ${addr.address_line_2}`}
@@ -108,7 +108,7 @@ export default function AccountTab({
                     </span>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <button
                     onClick={() => {
                       setEditingAddress(addr);
@@ -132,15 +132,15 @@ export default function AccountTab({
       </section>
 
       {/* Phone Numbers */}
-      <section className="bg-white rounded-xl shadow-sm border p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Phone Numbers</h2>
+      <section className="bg-white rounded-xl shadow-sm border p-4 sm:p-6">
+        <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:justify-between sm:items-center">
+          <h2 className="text-lg font-semibold sm:text-xl">Phone Numbers</h2>
           <button
             onClick={() => {
               setEditingPhone(null);
               setShowPhoneForm(true);
             }}
-            className="text-sm bg-black text-white px-4 py-2 rounded-lg"
+            className="text-sm bg-black text-white px-4 py-2 rounded-lg w-full sm:w-auto"
           >
             Add Phone Number
           </button>
@@ -152,9 +152,9 @@ export default function AccountTab({
             {phones.map((phone) => (
               <div
                 key={phone.public_id}
-                className="border rounded-lg p-4 flex justify-between items-center"
+                className="border rounded-lg p-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center"
               >
-                <div>
+                <div className="min-w-0 break-words">
                   <p className="font-medium">{phone.phone_number}</p>
                   {phone.is_default && (
                     <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
@@ -162,7 +162,7 @@ export default function AccountTab({
                     </span>
                   )}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <button
                     onClick={() => {
                       setEditingPhone(phone);

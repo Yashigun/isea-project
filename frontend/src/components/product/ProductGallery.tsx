@@ -35,9 +35,9 @@ export default function ProductGallery({
   }, [firstImage]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
 
-      <div className="overflow-hidden rounded-[32px]">
+      <div className="overflow-hidden rounded-[24px] sm:rounded-[28px] lg:rounded-[32px]">
 
         <Image
           src={selected}
@@ -52,7 +52,7 @@ export default function ProductGallery({
 
       {imageUrls.length > 1 && (
 
-        <div className="flex gap-4">
+        <div className="flex gap-3 overflow-x-auto sm:gap-4">
 
           {imageUrls.map((image) => (
 
@@ -60,6 +60,7 @@ export default function ProductGallery({
               key={image}
               onClick={() => setSelected(image)}
               className={`
+                shrink-0
                 overflow-hidden
                 rounded-xl
                 border-2
@@ -78,7 +79,7 @@ export default function ProductGallery({
                 alt={name}
                 width={110}
                 height={110}
-                className="aspect-square object-cover"
+                className="aspect-square h-20 w-20 object-cover sm:h-[110px] sm:w-[110px]"
               />
 
             </button>

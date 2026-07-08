@@ -14,7 +14,7 @@ export default function Section({
   return (
     <section
       className={cn(
-        "py-16 md:py-20 lg:py-24",
+        "py-10 sm:py-12 md:py-20 lg:py-24",
         className
       )}
     >
