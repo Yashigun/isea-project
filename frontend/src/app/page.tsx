@@ -1,3 +1,4 @@
+
 import Hero from "@/components/Hero";
 import CollectionGrid from "@/components/CollectionGrid";
 import ProductGrid from "@/components/ProductGrid";
@@ -11,12 +12,51 @@ import { categoryService } from "@/services/category";
 import { productService } from "@/services/product";
 import { reviewService } from "@/services/review";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
-  const [categories, products, reviews] = await Promise.all([
-    categoryService.getAll(),
-    productService.getAll(),
-    reviewService.listAll(5),
-  ]);
+  const [categoriesResult, productsResult, reviewsResult] =
+    await Promise.allSettled([
+      categoryService.getAll(),
+      productService.getAll(),
+      reviewService.listAll(5),
+    ]);
+
+  const categories =
+    categoriesResult.status === "fulfilled"
+      ? categoriesResult.value
+      : [];
+
+  const products =
+    productsResult.status === "fulfilled"
+      ? productsResult.value
+      : [];
+
+  const reviews =
+    reviewsResult.status === "fulfilled"
+      ? reviewsResult.value
+      : [];
+
+  if (categoriesResult.status === "rejected") {
+    console.error(
+      "Failed to fetch homepage categories:",
+      categoriesResult.reason
+    );
+  }
+
+  if (productsResult.status === "rejected") {
+    console.error(
+      "Failed to fetch homepage products:",
+      productsResult.reason
+    );
+  }
+
+  if (reviewsResult.status === "rejected") {
+    console.error(
+      "Failed to fetch homepage reviews:",
+      reviewsResult.reason
+    );
+  }
 
   return (
     <>
@@ -32,6 +72,7 @@ export default async function HomePage() {
           <CollectionGrid categories={categories} />
         </Container>
       </Section>
+
       <Section>
         <Container>
           <SectionHeading
@@ -49,9 +90,11 @@ export default async function HomePage() {
             title="Shop Reviews"
             subtitle="What customers are saying."
           />
+
           <ShopReviews reviews={reviews} />
         </Container>
       </Section>
     </>
   );
 }
+
