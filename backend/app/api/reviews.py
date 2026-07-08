@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, File, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
@@ -44,6 +44,26 @@ async def create_review(
     service = ReviewService(db)
     try:
         review = await service.create(current_user.id, product_public_id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    return review
+
+
+@router.post("/{public_id}/images", response_model=ProductReviewResponseSchema)
+async def upload_review_images(
+    public_id: str,
+    files: List[UploadFile] = File(...),
+    current_user: Customer = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Upload images for an existing review."""
+    service = ReviewService(db)
+    try:
+        review = await service.upload_images(
+            current_user.id,
+            public_id,
+            files,
+        )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return review

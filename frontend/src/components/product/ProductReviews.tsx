@@ -49,12 +49,20 @@ export default function ProductReviews({ productPublicId }: ProductReviewsProps)
 
     setLoading(true);
     try {
-      await reviewService.create(productPublicId, {
+      const createdReview = await reviewService.create(productPublicId, {
         rating,
         title,
         review,
         age: age || null,
       });
+
+      if (images.length > 0) {
+        await reviewService.uploadImages(
+          createdReview.public_id,
+          images,
+        );
+      }
+
       setRating(0);
       setTitle("");
       setAge("");

@@ -120,6 +120,22 @@ class ProductReviewUpdateSchema(BaseRequestSchema):
         return validate_description(value)
 
 
+class ProductReviewImageResponseSchema(BaseResponseSchema):
+    """
+    Review image returned by the API.
+    """
+
+    image_url: str
+
+    cloudinary_public_id: str
+
+    original_filename: str
+
+    mime_type: str
+
+    file_size: int
+
+
 class ProductReviewResponseSchema(BaseResponseSchema):
     """
     Product review returned by the API.
@@ -134,3 +150,7 @@ class ProductReviewResponseSchema(BaseResponseSchema):
     age: str | None = None
 
     customer: CustomerResponseSchema
+
+    images: list[ProductReviewImageResponseSchema] = Field(
+        default_factory=list,
+    )

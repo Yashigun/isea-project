@@ -83,3 +83,63 @@ class ProductReview(
     product: Mapped["Product"] = relationship(
         back_populates="reviews",
     )
+
+    images: Mapped[list["ProductReviewImage"]] = relationship(
+        back_populates="review",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+class ProductReviewImage(
+    Base,
+    UUIDMixin,
+    TimestampMixin,
+    PublicIdMixin
+):
+    __tablename__ = "product_review_images"
+
+    __table_args__ = (
+        {
+            "schema": "store",
+        },
+    )
+
+    review_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey(
+            "store.product_reviews.id",
+            ondelete="CASCADE",
+        ),
+        nullable=False,
+        index=True,
+    )
+
+    image_url: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    cloudinary_public_id: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        unique=True,
+    )
+
+    original_filename: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
+    mime_type: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+    )
+
+    file_size: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    review: Mapped["ProductReview"] = relationship(
+        back_populates="images",
+    )
