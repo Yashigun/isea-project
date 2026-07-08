@@ -3,8 +3,7 @@ import { getStoredAccessToken, getStoredRefreshToken, clearAuthTokens, saveAuthT
 
 const API_URL =
   typeof window === "undefined"
-    ? process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/v1"
-    : "/api/v1";
+    ? process.env.NEXT_PUBLIC_API_URL  : "/api/v1";
 
 const api = axios.create({
   baseURL: API_URL,
