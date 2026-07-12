@@ -332,6 +332,7 @@ export default function CartPage() {
     try {
       const updated =
         await cartService.removeItem(
+
           productPublicId
         );
 
