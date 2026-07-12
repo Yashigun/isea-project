@@ -256,26 +256,29 @@ class OrderService:
         public_id: str,
     ) -> Order:
         order = await self.order_repo.get_customer_order(
-            customer_id,
-            public_id,
+            customer_id=customer_id,
+            public_id=public_id,
         )
 
         if not order:
             raise ValueError("Order not found")
 
-        if order.status not in (
+        if order.status not in {
             OrderStatus.PENDING,
             OrderStatus.CONFIRMED,
-        ):
-            raise ValueError("Order cannot be cancelled")
+        }:
+            raise ValueError(
+                "This order can no longer be cancelled"
+            )
 
         order.status = OrderStatus.CANCELLED
 
-        await self.order_repo.save(order)
-
         await self.db.commit()
 
-        return order
+        return await self.order_repo.get_customer_order(
+            customer_id=customer_id,
+            public_id=public_id,
+        )
 
     # ---------------------------------------------------------
     # Admin
