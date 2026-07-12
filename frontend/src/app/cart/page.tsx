@@ -242,11 +242,14 @@ export default function CartPage() {
         error
       );
 
-      if (previousCart) {
-        setCart(previousCart);
+      const cartToRestore =
+        previousCart as Cart | null;
+
+      if (cartToRestore) {
+        setCart(cartToRestore);
 
         dispatchCartUpdated(
-          previousCart.total_items
+          cartToRestore.total_items
         );
       }
 
@@ -351,11 +354,14 @@ export default function CartPage() {
         error
       );
 
-      if (previousCart) {
-        setCart(previousCart);
+      const cartToRestore =
+        previousCart as Cart | null;
+
+      if (cartToRestore) {
+        setCart(cartToRestore);
 
         dispatchCartUpdated(
-          previousCart.total_items
+          cartToRestore.total_items
         );
       }
 
