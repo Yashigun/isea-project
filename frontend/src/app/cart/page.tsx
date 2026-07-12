@@ -22,6 +22,7 @@ import { addressService } from "@/services/address";
 import { orderService } from "@/services/order";
 import { phoneService } from "@/services/phone";
 
+
 import { Address } from "@/types/address";
 import { Phone } from "@/types/phone";
 
@@ -505,7 +506,7 @@ export default function CartPage() {
 
             <div className="mt-7 flex gap-3">
               <Link
-                href="/orders"
+                href={`/orders/${order.public_id}`}
                 className="flex-1 rounded-full border border-black px-5 py-3 text-sm font-medium transition hover:bg-gray-50"
               >
                 View Orders

@@ -26,20 +26,79 @@ export default function OrderDetailsPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
 
   const getImage = (
     image: string | null | undefined
   ) => {
-    if (!image) return "/placeholder.jpg";
+    if (!image) {
+      return "/placeholder.jpg";
+    }
 
     if (image.startsWith("//")) {
-      return `https:${image}`;
+      return "https:" + image;
     }
 
     return image.replace(
       "http://res.cloudinary.com",
       "https://res.cloudinary.com"
     );
+  };
+
+  const cancelOrder = async () => {
+    if (!order) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this order?"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setCancelling(true);
+    setCancelError(null);
+
+    try {
+      const cancelledOrder = await orderService.cancel(
+        order.public_id
+      );
+
+      setOrder(cancelledOrder);
+    } catch (error: unknown) {
+      const detail =
+        typeof error === "object" &&
+        error !== null &&
+        "response" in error &&
+        typeof (
+          error as {
+            response?: {
+              data?: {
+                detail?: unknown;
+              };
+            };
+          }
+        ).response?.data?.detail === "string"
+          ? (
+              error as {
+                response: {
+                  data: {
+                    detail: string;
+                  };
+                };
+              }
+            ).response.data.detail
+          : null;
+
+      setCancelError(
+        detail || "Could not cancel order."
+      );
+    } finally {
+      setCancelling(false);
+    }
   };
 
   useEffect(() => {
@@ -101,10 +160,13 @@ export default function OrderDetailsPage() {
     );
   }
 
+  const canCancel =
+    order.status === "pending" ||
+    order.status === "confirmed";
+
   return (
     <AuthGuard>
       <div className="container mx-auto max-w-5xl px-4 py-10">
-
         <Link
           href="/profile"
           className="mb-6 inline-flex items-center gap-2 text-sm text-gray-600 transition hover:text-black"
@@ -120,8 +182,7 @@ export default function OrderDetailsPage() {
           -------------------------------- */}
 
           <section className="rounded-xl border bg-white p-6">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="flex items-center gap-2">
                   <PackageCheck size={24} />
@@ -140,16 +201,36 @@ export default function OrderDetailsPage() {
                 </p>
               </div>
 
-              <div className="sm:text-right">
-                <p className="text-sm text-gray-500">
-                  Status
-                </p>
+              <div className="flex flex-col gap-3 sm:items-end">
+                <div className="sm:text-right">
+                  <p className="text-sm text-gray-500">
+                    Status
+                  </p>
 
-                <p className="mt-1 capitalize font-semibold">
-                  {order.status}
-                </p>
+                  <p className="mt-1 font-semibold capitalize">
+                    {order.status}
+                  </p>
+                </div>
+
+                {canCancel && (
+                  <button
+                    type="button"
+                    onClick={cancelOrder}
+                    disabled={cancelling}
+                    className="rounded-full border border-red-600 px-5 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {cancelling
+                      ? "Cancelling..."
+                      : "Cancel Order"}
+                  </button>
+                )}
+
+                {cancelError && (
+                  <p className="max-w-xs text-sm text-red-600 sm:text-right">
+                    {cancelError}
+                  </p>
+                )}
               </div>
-
             </div>
           </section>
 
@@ -173,7 +254,6 @@ export default function OrderDetailsPage() {
                     key={item.public_id}
                     className="flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center"
                   >
-
                     {item.product ? (
                       <Link
                         href={`/products/${item.product.slug}`}
@@ -200,7 +280,6 @@ export default function OrderDetailsPage() {
                     )}
 
                     <div className="min-w-0 flex-1">
-
                       {item.product ? (
                         <Link
                           href={`/products/${item.product.slug}`}
@@ -233,7 +312,6 @@ export default function OrderDetailsPage() {
                         ₹{item.subtotal}
                       </p>
                     </div>
-
                   </div>
                 ))}
               </div>
@@ -280,7 +358,6 @@ export default function OrderDetailsPage() {
             </div>
 
             <div className="mt-5 space-y-3">
-
               <div className="flex justify-between gap-4">
                 <span className="text-gray-600">
                   Subtotal
@@ -332,7 +409,6 @@ export default function OrderDetailsPage() {
                   </span>
                 </div>
               </div>
-
             </div>
           </section>
 
