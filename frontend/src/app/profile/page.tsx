@@ -11,6 +11,7 @@ import { cartService, Cart } from "@/services/cart";
 import { wishlistService } from "@/services/wishlist";
 import { addressService } from "@/services/address";
 import { phoneService } from "@/services/phone";
+import { orderService, Order } from "@/services/order";
 
 import { Product } from "@/types/product";
 import { Address } from "@/types/address";
@@ -27,6 +28,7 @@ export default function ProfilePage() {
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [phones, setPhones] = useState<Phone[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -38,11 +40,13 @@ export default function ProfilePage() {
         wishlistResult,
         addressesResult,
         phonesResult,
+        ordersResult,
       ] = await Promise.allSettled([
         cartService.get(),
         wishlistService.get(),
         addressService.getAll(),
         phoneService.getAll(),
+        orderService.list(),
       ]);
 
       // ----------------------------
@@ -85,10 +89,18 @@ export default function ProfilePage() {
         setPhones([]);
       }
 
+      // ----------------------------
+      // Orders
+      // ----------------------------
+      if (ordersResult.status === "fulfilled") {
+        setOrders(ordersResult.value);
+      } else {
+        console.error("Failed to fetch orders:", ordersResult.reason);
+        setOrders([]);
+      }
+
       console.log("Profile data loaded");
     } catch (error) {
-      // This should rarely execute because Promise.allSettled()
-      // does not reject on individual request failures.
       console.error("Unexpected error while loading profile:", error);
     } finally {
       setLoading(false);
@@ -127,6 +139,7 @@ export default function ProfilePage() {
                   <DashboardTab
                     cart={cart}
                     wishlist={wishlist}
+                    orders={orders}
                     onRefresh={fetchData}
                   />
                 )}
