@@ -28,10 +28,16 @@ export default function DashboardTab({
   orders,
   onRefresh,
 }: DashboardTabProps) {
-  const [removing, setRemoving] = useState<string | null>(null);
+  const [removing, setRemoving] = useState<
+    string | null
+  >(null);
 
-  const getImage = (image: string | null | undefined) => {
-    if (!image) return "/placeholder.jpg";
+  const getImage = (
+    image: string | null | undefined
+  ) => {
+    if (!image) {
+      return "/placeholder.jpg";
+    }
 
     if (image.startsWith("//")) {
       return `https:${image}`;
@@ -62,75 +68,46 @@ export default function DashboardTab({
   };
 
   return (
-<<<<<<< HEAD
     <div className="space-y-6 sm:space-y-8">
-      <h1 className="text-2xl font-bold sm:text-3xl">Dashboard</h1>
-
-      <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border bg-white p-4 sm:p-5">
-          <div className="flex items-center gap-2">
-            <PackageCheck size={22} />
-            <h2 className="text-lg font-semibold sm:text-xl">Past Orders</h2>
-          </div>
-          <p className="mt-4 rounded-lg bg-gray-50 p-4 text-center text-gray-500 sm:mt-5 sm:p-5">
-            No past orders yet.
-          </p>
-        </div>
-        <div className="rounded-xl border bg-white p-4 sm:p-5">
-          <div className="flex items-center gap-2">
-            <ReceiptText size={22} />
-            <h2 className="text-lg font-semibold sm:text-xl">Invoices</h2>
-          </div>
-          <p className="mt-4 rounded-lg bg-gray-50 p-4 text-center text-gray-500 sm:mt-5 sm:p-5">
-            No invoices yet.
-          </p>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="text-xl font-semibold mb-4 flex flex-wrap items-center gap-2 sm:text-2xl">
-          <Heart className="text-red-500" size={24} />
-          Wishlist
-          <span className="text-sm font-normal text-gray-500 ml-0 sm:ml-2">
-=======
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold">
+      <h1 className="text-2xl font-bold sm:text-3xl">
         Dashboard
       </h1>
 
+      {/* Orders and Invoices */}
+
       <section className="grid gap-4 md:grid-cols-2">
+        {/* Past Orders */}
 
-        {/* --------------------------------
-            Past Orders
-        -------------------------------- */}
-
-        <div className="rounded-xl border bg-white p-5">
+        <div className="min-w-0 rounded-xl border bg-white p-4 sm:p-5">
           <div className="flex items-center gap-2">
-            <PackageCheck size={22} />
+            <PackageCheck
+              size={22}
+              className="flex-shrink-0"
+            />
 
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-lg font-semibold sm:text-xl">
               Past Orders
             </h2>
           </div>
 
           {orders.length === 0 ? (
-            <p className="mt-5 rounded-lg bg-gray-50 p-5 text-center text-gray-500">
+            <p className="mt-4 rounded-lg bg-gray-50 p-4 text-center text-gray-500 sm:mt-5 sm:p-5">
               No past orders yet.
             </p>
           ) : (
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-3 sm:mt-5">
               {orders.map((order) => (
                 <Link
                   key={order.public_id}
                   href={`/orders/${order.public_id}`}
-                  className="flex items-center justify-between gap-4 rounded-lg border p-4 transition hover:bg-gray-50"
+                  className="flex min-w-0 items-center justify-between gap-3 rounded-lg border p-3 transition hover:bg-gray-50 sm:gap-4 sm:p-4"
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-xs text-gray-500">
                       Order ID
                     </p>
 
-                    <p className="truncate font-medium">
+                    <p className="truncate text-sm font-medium sm:text-base">
                       {order.public_id}
                     </p>
                   </div>
@@ -145,37 +122,38 @@ export default function DashboardTab({
           )}
         </div>
 
-        {/* --------------------------------
-            Invoices
-        -------------------------------- */}
+        {/* Invoices */}
 
-        <div className="rounded-xl border bg-white p-5">
+        <div className="min-w-0 rounded-xl border bg-white p-4 sm:p-5">
           <div className="flex items-center gap-2">
-            <ReceiptText size={22} />
+            <ReceiptText
+              size={22}
+              className="flex-shrink-0"
+            />
 
-            <h2 className="text-xl font-semibold">
+            <h2 className="text-lg font-semibold sm:text-xl">
               Invoices
             </h2>
           </div>
 
           {orders.length === 0 ? (
-            <p className="mt-5 rounded-lg bg-gray-50 p-5 text-center text-gray-500">
+            <p className="mt-4 rounded-lg bg-gray-50 p-4 text-center text-gray-500 sm:mt-5 sm:p-5">
               No invoices yet.
             </p>
           ) : (
-            <div className="mt-5 space-y-3">
+            <div className="mt-4 space-y-3 sm:mt-5">
               {orders.map((order) => (
                 <div
                   key={order.public_id}
-                  className="rounded-lg border p-4"
+                  className="rounded-lg border p-3 sm:p-4"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="min-w-0">
+                  <div className="flex min-w-0 items-center justify-between gap-3 sm:gap-4">
+                    <div className="min-w-0 flex-1">
                       <p className="text-xs text-gray-500">
                         Order ID
                       </p>
 
-                      <p className="truncate font-medium">
+                      <p className="truncate text-sm font-medium sm:text-base">
                         {order.public_id}
                       </p>
                     </div>
@@ -185,7 +163,7 @@ export default function DashboardTab({
                         Total Amount
                       </p>
 
-                      <p className="font-semibold">
+                      <p className="text-sm font-semibold sm:text-base">
                         ₹{order.total_amount}
                       </p>
                     </div>
@@ -197,60 +175,44 @@ export default function DashboardTab({
         </div>
       </section>
 
-      {/* --------------------------------
-          Wishlist
-      -------------------------------- */}
+      {/* Wishlist */}
 
       <section>
-        <h2 className="mb-4 flex items-center gap-2 text-2xl font-semibold">
+        <h2 className="mb-4 flex flex-wrap items-center gap-2 text-xl font-semibold sm:text-2xl">
           <Heart
-            className="text-red-500"
+            className="flex-shrink-0 text-red-500"
             size={24}
           />
 
           Wishlist
 
-          <span className="ml-2 text-sm font-normal text-gray-500">
->>>>>>> feature
+          <span className="text-sm font-normal text-gray-500 sm:ml-2">
             ({wishlist.length} items)
           </span>
         </h2>
 
         {wishlist.length === 0 ? (
-<<<<<<< HEAD
-          <p className="text-gray-500 py-6 px-4 text-center bg-gray-50 rounded-xl sm:py-8">
-=======
-          <p className="rounded-xl bg-gray-50 py-8 text-center text-gray-500">
->>>>>>> feature
-            Your wishlist is empty. Start adding items you love!
+          <p className="rounded-xl bg-gray-50 px-4 py-6 text-center text-gray-500 sm:py-8">
+            Your wishlist is empty. Start adding items you
+            love!
           </p>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {wishlist.map((product) => (
               <div
                 key={product.public_id}
-<<<<<<< HEAD
-                className="bg-white rounded-xl shadow-sm border p-3 flex items-start gap-3 sm:p-4 sm:gap-4"
-=======
-                className="flex items-start gap-4 rounded-xl border bg-white p-4 shadow-sm"
->>>>>>> feature
+                className="flex min-w-0 items-start gap-3 rounded-xl border bg-white p-3 shadow-sm sm:gap-4 sm:p-4"
               >
                 <Link
                   href={`/products/${product.slug}`}
                   className="flex-shrink-0"
                 >
                   <Image
-                    src={getImage(
-                      product.primary_image
-                    )}
+                    src={getImage(product.primary_image)}
                     alt={product.name}
                     width={80}
                     height={80}
-<<<<<<< HEAD
-                    className="rounded-lg object-cover w-16 h-16 sm:w-20 sm:h-20"
-=======
-                    className="h-20 w-20 rounded-lg object-cover"
->>>>>>> feature
+                    className="h-16 w-16 rounded-lg object-cover sm:h-20 sm:w-20"
                   />
                 </Link>
 
@@ -269,6 +231,7 @@ export default function DashboardTab({
                 </div>
 
                 <button
+                  type="button"
                   onClick={() =>
                     handleRemoveFromWishlist(
                       product.public_id
@@ -277,7 +240,8 @@ export default function DashboardTab({
                   disabled={
                     removing === product.public_id
                   }
-                  className="flex-shrink-0 text-gray-400 transition-colors hover:text-red-500"
+                  aria-label={`Remove ${product.name} from wishlist`}
+                  className="flex-shrink-0 text-gray-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <X size={18} />
                 </button>
