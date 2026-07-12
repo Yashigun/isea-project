@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -31,6 +32,7 @@ class PaymentMethod(str, Enum):
     CARD = "card"
     UPI = "upi"
     NET_BANKING = "net_banking"
+    COD = "cod"
 
 
 class PaymentStatus(str, Enum):

@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from decimal import Decimal
@@ -11,8 +12,8 @@ from app.models.store.order import (
     OrderStatus,
 )
 
-from app.schemas.address import (
-    AddressResponseSchema,
+from app.models.store.payment import (
+    PaymentMethod,
 )
 
 from app.schemas.common import (
@@ -62,6 +63,10 @@ class OrderCreateSchema(BaseRequestSchema):
 
     shipping_address_public_id: str
 
+    phone_public_id: str
+
+    payment_method: PaymentMethod
+
     order_notes: str | None = Field(
         default=None,
         max_length=1000,
@@ -93,7 +98,21 @@ class OrderResponseSchema(OrderSummarySchema):
     Complete order details.
     """
 
-    shipping_address: AddressResponseSchema
+    shipping_name: str
+
+    shipping_phone: str
+
+    address_line_1: str
+
+    address_line_2: str | None
+
+    city: str
+
+    state: str
+
+    country: str
+
+    postal_code: str
 
     items: list[OrderItemResponseSchema] = Field(
         default_factory=list,

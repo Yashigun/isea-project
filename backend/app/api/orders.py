@@ -48,6 +48,8 @@ async def create_order(
         order = await service.create_order(
             customer_id=current_user.id,
             address_public_id=data.shipping_address_public_id,
+            phone_public_id=data.phone_public_id,
+            payment_method=data.payment_method,
             notes=data.order_notes,
         )
     except ValueError as e:
