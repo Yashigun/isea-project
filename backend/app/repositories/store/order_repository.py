@@ -186,9 +186,11 @@ class OrderRepository(BaseRepository[Order]):
             select(Order)
             .options(
                 selectinload(Order.customer),
-                selectinload(Order.items).selectinload(
-                    OrderItem.product
-                ),
+
+                selectinload(Order.items)
+                .selectinload(OrderItem.product)
+                .selectinload(Product.images),
+
                 selectinload(Order.payment),
             )
             .order_by(Order.created_at.desc())
@@ -198,6 +200,7 @@ class OrderRepository(BaseRepository[Order]):
 
         return list(result.scalars().all())
 
+
     async def get_admin_order(
         self,
         public_id: str,
@@ -206,12 +209,15 @@ class OrderRepository(BaseRepository[Order]):
             select(Order)
             .options(
                 selectinload(Order.customer),
-                selectinload(Order.items).selectinload(
-                    OrderItem.product
-                ),
+
+                selectinload(Order.items)
+                .selectinload(OrderItem.product)
+                .selectinload(Product.images),
+
                 selectinload(Order.payment),
             )
             .where(Order.public_id == public_id)
+            .execution_options(populate_existing=True)
         )
 
         result = await self.db.execute(stmt)

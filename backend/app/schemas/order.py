@@ -133,3 +133,5 @@ class OrderResponseSchema(OrderSummarySchema):
     model_config = ConfigDict(
         from_attributes=True,
     )
+
+
