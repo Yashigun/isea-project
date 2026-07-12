@@ -22,7 +22,6 @@ import { addressService } from "@/services/address";
 import { orderService } from "@/services/order";
 import { phoneService } from "@/services/phone";
 
-
 import { Address } from "@/types/address";
 import { Phone } from "@/types/phone";
 
@@ -179,7 +178,9 @@ export default function CartPage() {
           return {
             ...item,
             quantity,
-            subtotal: newSubtotal.toFixed(2),
+            subtotal: Number(
+              newSubtotal.toFixed(2)
+            ),
           };
         }
       );
@@ -210,8 +211,10 @@ export default function CartPage() {
         ...currentCart,
         items: updatedItems,
         total_items: totalItems,
-        subtotal: subtotal.toFixed(2),
-        total_amount: totalAmount.toFixed(2),
+        subtotal: Number(subtotal.toFixed(2)),
+        total_amount: Number(
+          totalAmount.toFixed(2)
+        ),
       };
     });
 
@@ -318,8 +321,10 @@ export default function CartPage() {
         ...currentCart,
         items: updatedItems,
         total_items: totalItems,
-        subtotal: subtotal.toFixed(2),
-        total_amount: totalAmount.toFixed(2),
+        subtotal: Number(subtotal.toFixed(2)),
+        total_amount: Number(
+          totalAmount.toFixed(2)
+        ),
       };
     });
 
@@ -332,7 +337,6 @@ export default function CartPage() {
     try {
       const updated =
         await cartService.removeItem(
-
           productPublicId
         );
 
@@ -507,7 +511,7 @@ export default function CartPage() {
 
             <div className="mt-7 flex gap-3">
               <Link
-                href={`/orders/${order.public_id}`}
+                href={`/orders/${placedOrderId}`}
                 className="flex-1 rounded-full border border-black px-5 py-3 text-sm font-medium transition hover:bg-gray-50"
               >
                 View Orders
