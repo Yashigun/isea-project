@@ -8,9 +8,11 @@ import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/common/SectionHeading";
 import ShopReviews from "@/components/ShopReviews";
 
+
 import { categoryService } from "@/services/category";
 import { productService } from "@/services/product";
 import { reviewService } from "@/services/review";
+import ReviewSummary from "@/components/ReviewSummary";
 
 export const dynamic = "force-dynamic";
 
@@ -90,8 +92,15 @@ export default async function HomePage() {
             title="Shop Reviews"
             subtitle="What customers are saying."
           />
-
-          <ShopReviews reviews={reviews} />
+          <div className="space-y-8">
+            <ReviewSummary
+              reviews={reviews}
+            />
+            <ShopReviews
+              reviews={reviews}
+              limit={8}
+            />
+          </div>
         </Container>
       </Section>
     </>
