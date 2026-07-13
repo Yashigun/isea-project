@@ -139,6 +139,12 @@ export default function Navbar() {
               href="/"
               className="text-lg font-medium transition-colors duration-300 ease-in-out hover:text-[#ac142a]"
             >
+              Home
+            </Link>
+            <Link
+              href="/products"
+              className="text-lg font-medium transition-colors duration-300 ease-in-out hover:text-[#ac142a]"
+            >
               Shop
             </Link>
 
@@ -241,6 +247,13 @@ export default function Navbar() {
             <nav className="flex flex-col">
               <Link
                 href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="border-b border-black/10 py-4 text-lg font-medium transition-colors duration-300 ease-in-out hover:text-[#ac142a]"
+              >
+                Home
+              </Link>
+              <Link
+                href="/products"
                 onClick={() => setMobileMenuOpen(false)}
                 className="border-b border-black/10 py-4 text-lg font-medium transition-colors duration-300 ease-in-out hover:text-[#ac142a]"
               >
